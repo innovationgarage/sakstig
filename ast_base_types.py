@@ -1,3 +1,5 @@
+import functools
+
 class QuerySet(list):
     def execute(self, query):
         import grammar
@@ -172,10 +174,14 @@ class op_bool_or(MathOp):
         return a or b
 
 class filter(Op):
+    def is_true(self, queryset):
+        return queryset and functools.reduce(lambda a, b: a and b, queryset, True)
+        
     def __call__(self, queryset):
-        for filter in self.args:
+        queryset = self.args[0](queryset)
+        for filter in self.args[1:]:
             queryset = QuerySet(
                 item
                 for item in queryset
-                if filter(QuerySet([item])))
+                if self.is_true(filter(QuerySet([item]))))
         return queryset
