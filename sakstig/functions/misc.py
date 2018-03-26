@@ -1,6 +1,6 @@
 # Misc functions
 
-import ast_base_types
+from .. import ast_base_types
 import uuid
 
 class _type(ast_base_types.Function):

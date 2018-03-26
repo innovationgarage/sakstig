@@ -1,6 +1,6 @@
 # Casting functions
 
-import ast_base_types
+from .. import ast_base_types
 
 class _str(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):

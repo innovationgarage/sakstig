@@ -1,6 +1,6 @@
 # Arithmetic functions
 
-import ast_base_types
+from .. import ast_base_types
 
 class _sum(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):

@@ -1,5 +1,5 @@
-import ast_base_types
-import functions
+from . import ast_base_types
+from . import functions
 
 class AST(object):
     def __new__(cls, node):

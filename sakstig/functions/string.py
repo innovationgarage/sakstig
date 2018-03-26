@@ -1,6 +1,6 @@
 # String functions
 
-import ast_base_types
+from .. import ast_base_types
 import html
     
 class replace(ast_base_types.Function):

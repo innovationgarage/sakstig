@@ -1,6 +1,6 @@
-import grammar
-import ast
-import ast_base_types
+from . import grammar
+from . import ast
+from . import ast_base_types
 
 QuerySet = ast_base_types.QuerySet
 
@@ -8,8 +8,7 @@ QuerySet = ast_base_types.QuerySet
 def Tree(root):
     return QuerySet([root])
 
-
-if __name__ == "__main__":
+def main():
     import sys
     import json
     query = sys.argv[1]
@@ -19,3 +18,6 @@ if __name__ == "__main__":
     else:
         data = json.load(sys.stdin)
     print(json.dumps(QuerySet([data]).execute(query)))
+
+if __name__ == "__main__":
+    main()

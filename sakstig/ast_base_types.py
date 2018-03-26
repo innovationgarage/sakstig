@@ -9,8 +9,8 @@ def is_list(o):
 
 class QuerySet(list):
     def execute(self, query):
-        import grammar
-        import ast
+        from . import grammar
+        from . import ast
         tree = grammar.grammar.parse(query)
         if not tree.is_valid:
             raise SyntaxError("Malformed query: %s<ERROR>%s\n%s" % (
