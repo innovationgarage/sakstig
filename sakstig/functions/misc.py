@@ -2,6 +2,10 @@
 
 from .. import ast_base_types
 import uuid
+try:
+    import jsonschema
+except:
+    jsonschema = None
 
 class _type(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
@@ -19,3 +23,11 @@ class _type(ast_base_types.Function):
 class generateID(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         return ast_base_types.QuerySet([str(uuid.uuid4())])
+
+class matches(ast_base_types.Function):
+    def call(self, global_qs, local_qs, args):
+        def validate(item):
+            for schema in args[1]:
+                jsonschema.validate(item, schema)
+            return item
+        return args[0].map(validate)

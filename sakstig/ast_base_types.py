@@ -25,7 +25,6 @@ class QuerySet(list):
                 try:
                     yield fn(item)
                 except Exception as e:
-                    print(e)
                     pass
         return QuerySet(map())
 
