@@ -1,5 +1,12 @@
 import functools
 
+def is_str(o):
+    return hasattr(o, 'split')
+def is_dict(o):
+    return hasattr(o, 'values')
+def is_list(o):
+    return hasattr(o, '__iter__') and not is_dict(o) and not is_str(o)
+
 class QuerySet(list):
     def execute(self, query):
         import grammar
@@ -25,10 +32,12 @@ class QuerySet(list):
     def flatten(self):
         def flatten():
             for item in self:
-                if hasattr(item, 'values'):
+                if is_str(item):
+                    yield item
+                elif is_dict(item):
                     for value in item.values():
                         yield value
-                elif hasattr(item, '__iter__'):
+                elif is_list(item):
                     for value in item:
                         yield value
                 else:
@@ -73,7 +82,13 @@ class Op(Expr, metaclass=Registry):
 class Function(Op):
     abstract = True
     def __call__(self, global_qs, local_qs):
+        return self.call(
+            global_qs,
+            local_qs,
+            [arg(global_qs, local_qs) for arg in self.args])
+    def call(self, global_qs, local_qs, args):
         raise NotImplementedError
+    
     def __repr__(self):
         return "%s(%s)" % (self.name, ", ".join(repr(arg) for arg in self.args))
 
