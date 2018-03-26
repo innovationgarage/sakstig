@@ -18,10 +18,12 @@ class SakstigGrammar(Grammar):
     p_curly_l = Regex(r"{")
     p_curly_r = Regex(r"}")
 
-    t_array = Sequence(p_hard_l, List(START, delimiter=',', mi=0, ma=None, opt=True), p_hard_r)
+    t_array_list = List(START, delimiter=',', mi=0, ma=None, opt=True)
+    t_array = Sequence(p_hard_l, t_array_list, p_hard_r)
 
     t_dict_item = Sequence(START, Token(":"), START)
-    t_dict = Sequence(p_curly_l, List(t_dict_item, delimiter=',', mi=0, ma=None, opt=True), p_curly_r)
+    t_dict_list = List(t_dict_item, delimiter=',', mi=0, ma=None, opt=True)
+    t_dict = Sequence(p_curly_l, t_dict_list, p_curly_r)
 
     t = Choice(t_number, t_string, t_null, t_true, t_false, t_array, t_dict)
     s_expr = Choice(name, t)
@@ -29,7 +31,8 @@ class SakstigGrammar(Grammar):
     p_expr = Sequence(p_round_l, START, p_round_r)
     f_expr = Sequence(p_hard_l, START, p_hard_r)
 
-    a_expr = Sequence(p_round_l, List(START, delimiter=',', mi=0, ma=None, opt=True), p_round_r)
+    a_expr_list = List(START, delimiter=',', mi=0, ma=None, opt=True)
+    a_expr = Sequence(p_round_l, a_expr_list, p_round_r)
 
     nop = Tokens("not")
     nop_expr = Sequence(nop, START)

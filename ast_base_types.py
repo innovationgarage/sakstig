@@ -113,10 +113,10 @@ class Array(Expr):
     def __init__(self, items):
         self.items = items
     def __call__(self, global_qs, local_qs):
-        return [item[0]
-                for item in (item(global_qs, local_qs)
-                             for item in self.items)
-                if item]
+        return QuerySet([[item[0]
+                          for item in (item(global_qs, local_qs)
+                                       for item in self.items)
+                          if item]])
     def __repr__(self):
         return "[%s]" % (", ".join(repr(item) for item in self.items),)
 

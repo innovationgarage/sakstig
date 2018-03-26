@@ -7,10 +7,10 @@ class AST(object):
         return self._build_ast(node)
     def _build_ast(self, node):
         name = getattr(node.element, 'name', None)
-        if len(node.children) == 1:
-            return self._build_ast(node.children[0])
-        elif name is not None and hasattr(self, name):
+        if name is not None and hasattr(self, name):
             return getattr(self, name)(node, *(self._build_ast(child) for child in node.children))
+        elif len(node.children) == 1:
+            return self._build_ast(node.children[0])
         elif node.children:
             children = node.children
             left = self._build_ast(children[0])
@@ -21,12 +21,20 @@ class AST(object):
                 children = children[2:]
             return left
         else:
-            return self.other(node)
+            if hasattr(node.element, 'name'):
+                return self.other(node)
+            else:
+                return self.sep(node)
     class other(object):
         def __init__(self, node):
             self.type = getattr(node.element, 'name', None)
         def __repr__(self):
             return "<%s>" % self.type
+    class sep(object):
+        def __init__(self, node):
+            self.str = node.string
+        def __repr__(self):
+            return "<%s>" % self.str
     def t_number(self, node):
         if 'e' in node.string or '.' in node.string:
             return ast_base_types.Const(float(node.string))
@@ -42,18 +50,32 @@ class AST(object):
         return ast_base_types.Const(False)
     def name(self, node):
         return ast_base_types.Name(node.string)
-    def t_array(self, node, *items):
-        return ast_base_types.Array(items[1:-1])
+    def t_array_list(self, node, *items):
+        return ast_base_types.Array(
+            item
+            for item in items
+            if not isinstance(item, self.sep))
+    def t_array(self, node, l, items, r):
+        return items
     def t_dict_item(self, node, left, sep, right):
         return (left, right)
-    def t_dict(self, node, *items):
-        return ast_base_types.Dict(items[1:1])
+    def t_dict_list(self, node, *items):
+        return ast_base_types.Dict(
+            item
+            for item in items
+            if not isinstance(item, self.sep))
+    def t_dict(self, node, l, items, r):
+        return items
     def p_expr(self, node, l, expr, r):
         return expr
     def f_expr(self, node, l, expr, r):
         return expr
-    def a_expr(self, node, *args):
-        return args[1:-1]
+    def a_expr_list(self, node, *items):
+        return [item
+                for item in items
+                if not isinstance(item, self.sep)]
+    def a_expr(self, node, l, args, r):
+        return args
     def c_expr(self, node, name, args):
         return ast_base_types.Function(name.name, *args)
     def nop_expr(self, node, nop, expr):
@@ -66,7 +88,7 @@ class AST(object):
     op_comp = op
     op_bool = op
     def fpath(self, node, path, *filters):
-        filters = [f for f in filters if not (isinstance(f, AST.other) and f.type is None)]
+        filters = [f for f in filters if not isinstance(f, self.sep)]
         if not filters:
             return path
         return ast_base_types.Op("filter", path, *filters)
