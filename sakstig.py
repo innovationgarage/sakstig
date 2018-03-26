@@ -12,4 +12,10 @@ def Tree(root):
 if __name__ == "__main__":
     import sys
     import json
-    print(json.dumps(QuerySet([json.load(sys.stdin)]).execute(sys.argv[1])))
+    query = sys.argv[1]
+    if len(sys.argv) > 2:
+        with open(sys.argv[2]) as f:
+            data = json.load(f)
+    else:
+        data = json.load(sys.stdin)
+    print(json.dumps(QuerySet([data]).execute(query)))

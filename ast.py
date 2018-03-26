@@ -1,4 +1,5 @@
 import ast_base_types
+import functions
 
 class AST(object):
     def __new__(cls, node):
@@ -54,7 +55,7 @@ class AST(object):
     def a_expr(self, node, *args):
         return args[1:-1]
     def c_expr(self, node, name, args):
-        return ast_base_types.Function(name, *args)
+        return ast_base_types.Function(name.name, *args)
     def nop_expr(self, node, nop, expr):
         return ast_base_types.Op("not", expr)
     def op(self, node, left, right):

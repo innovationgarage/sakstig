@@ -12,6 +12,29 @@ class QuerySet(list):
                 grammar.format_tree(tree.tree)))
         return ast.AST(tree.tree)(self, self)
 
+    def map(self, fn):
+        def map():
+            for item in self:
+                try:
+                    yield fn(item)
+                except Exception as e:
+                    print(e)
+                    pass
+        return QuerySet(map())
+
+    def flatten(self):
+        def flatten():
+            for item in self:
+                if hasattr(item, 'values'):
+                    for value in item.values():
+                        yield value
+                elif hasattr(item, '__iter__'):
+                    for value in item:
+                        yield value
+                else:
+                    yield item
+        return QuerySet(flatten())
+
 class Expr(object):
     def __call__(self, global_qs, local_qs):
         raise NotImplementedError
@@ -29,6 +52,8 @@ class Registry(type):
     def __init__(cls, name, bases, members):
         type.__init__(cls, name, bases, members)
         if 'abstract' not in members:
+            if name.startswith("_"):
+                name = name[1:]
             cls._registry[name] = cls
     
 class Op(Expr, metaclass=Registry):
@@ -118,6 +143,7 @@ class op_path_multi(Op):
         return self.args[1](global_qs, descendants(self.args[0](global_qs, local_qs)))
 
 class MathOp(Op):
+    abstract = True
     def op(self, a, b):
         raise NotImplementedError
     def __call__(self, global_qs, local_qs):
