@@ -10,16 +10,16 @@ class QuerySet(list):
                 query[:tree.pos],
                 query[tree.pos:],
                 grammar.format_tree(tree.tree)))
-        return ast.AST(tree.tree)(self)
+        return ast.AST(tree.tree)(self, self)
 
 class Expr(object):
-    def __call__(self, queryset):
+    def __call__(self, global_qs, local_qs):
         raise NotImplementedError
 
 class Const(Expr):
     def __init__(self, value):
         self.value = value
-    def __call__(self, queryset):
+    def __call__(self, global_qs, local_qs):
         return QuerySet([self.value])
     def __repr__(self):
         return "%s" % self.value
@@ -40,14 +40,14 @@ class Op(Expr, metaclass=Registry):
     def __init__(self, name, *args):
         self.name = name
         self.args = args
-    def __call__(self, queryset):
+    def __call__(self, global_qs, local_qs):
         raise NotImplementedError
     def __repr__(self):
         return "%s(%s)" % (self.name, ", ".join(repr(arg) for arg in self.args))
 
 class Function(Op):
     abstract = True
-    def __call__(self, queryset):
+    def __call__(self, global_qs, local_qs):
         raise NotImplementedError
     def __repr__(self):
         return "%s(%s)" % (self.name, ", ".join(repr(arg) for arg in self.args))
@@ -69,15 +69,17 @@ def descendants(item):
 class Name(Expr):
     def __init__(self, name):
         self.name = name
-    def __call__(self, queryset):
+    def __call__(self, global_qs, local_qs):
         if self.name == "$":
-            return queryset
+            return global_qs
+        elif self.name == "@":
+            return local_qs        
         elif self.name == "*":
             return QuerySet(child_item
-                            for item in queryset
+                            for item in local_qs
                             for child_item in children(item))
         else:
-            return QuerySet(item[self.name] for item in queryset
+            return QuerySet(item[self.name] for item in local_qs
                             if self.name in item)
     def __repr__(self):
         return "%s" % (self.name,)
@@ -85,9 +87,9 @@ class Name(Expr):
 class Array(Expr):
     def __init__(self, items):
         self.items = items
-    def __call__(self, queryset):
+    def __call__(self, global_qs, local_qs):
         return [item[0]
-                for item in (item(queryset)
+                for item in (item(global_qs, local_qs)
                              for item in self.items)
                 if item]
     def __repr__(self):
@@ -96,32 +98,32 @@ class Array(Expr):
 class Dict(Expr):
     def __init__(self, items):
         self.items = items
-    def __call__(self, queryset):
-        return {key[0]: value[0]
-                for key, value in ((key(queryset), value(queryset))
-                                   for key, value in self.items)
-                if key and value}
+    def __call__(self, global_qs, local_qs):
+        return QuerySet([{key[0]: value[0]
+                          for key, value in ((key(global_qs, local_qs), value(global_qs, local_qs))
+                                             for key, value in self.items)
+                          if key and value}])
     def __repr__(self):
         return "{%s}" % (", ".join("%s: %s" % (repr(key), repr(value))
                                                for key, value in self.items),)
 
 class op_path_one(Op):
-    def __call__(self, queryset):
+    def __call__(self, global_qs, local_qs):
         assert isinstance(self.args[1], Name)
-        return self.args[1](self.args[0](queryset))
+        return self.args[1](global_qs, self.args[0](global_qs, local_qs))
 
 class op_path_multi(Op):
-    def __call__(self, queryset):
+    def __call__(self, global_qs, local_qs):
         assert isinstance(self.args[1], Name)
-        return self.args[1](descendants(self.args[0](queryset)))
+        return self.args[1](global_qs, descendants(self.args[0](global_qs, local_qs)))
 
 class MathOp(Op):
     def op(self, a, b):
         raise NotImplementedError
-    def __call__(self, queryset):
+    def __call__(self, global_qs, local_qs):
         def result():
-            for a in self.args[0](queryset):
-                for b in self.args[1](queryset):
+            for a in self.args[0](global_qs, local_qs):
+                for b in self.args[1](global_qs, local_qs):
                     yield self.op(a, b)
         return QuerySet(result())
 
@@ -177,11 +179,11 @@ class filter(Op):
     def is_true(self, queryset):
         return queryset and functools.reduce(lambda a, b: a and b, queryset, True)
         
-    def __call__(self, queryset):
-        queryset = self.args[0](queryset)
+    def __call__(self, global_qs, local_qs):
+        local_qs = self.args[0](global_qs, local_qs)
         for filter in self.args[1:]:
-            queryset = QuerySet(
+            local_qs = QuerySet(
                 item
-                for item in queryset
-                if self.is_true(filter(QuerySet([item]))))
-        return queryset
+                for item in local_qs
+                if self.is_true(filter(global_qs, QuerySet([item]))))
+        return local_qs
