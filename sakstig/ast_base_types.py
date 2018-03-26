@@ -7,17 +7,22 @@ def is_dict(o):
 def is_list(o):
     return hasattr(o, '__iter__') and not is_dict(o) and not is_str(o)
 
+def compile(query):
+    from . import grammar
+    from . import ast
+    tree = grammar.grammar.parse(query)
+    if not tree.is_valid:
+        raise SyntaxError("Malformed query: %s<ERROR>%s\n%s" % (
+            query[:tree.pos],
+            query[tree.pos:],
+            grammar.format_tree(tree.tree)))
+    return ast.AST(tree.tree)
+    
 class QuerySet(list):
     def execute(self, query):
-        from . import grammar
-        from . import ast
-        tree = grammar.grammar.parse(query)
-        if not tree.is_valid:
-            raise SyntaxError("Malformed query: %s<ERROR>%s\n%s" % (
-                query[:tree.pos],
-                query[tree.pos:],
-                grammar.format_tree(tree.tree)))
-        return ast.AST(tree.tree)(self, self)
+        if not isinstance(query, Expr):
+            query = compile(query)
+        return query(self, self)
 
     def map(self, fn):
         def map():

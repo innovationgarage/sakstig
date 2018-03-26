@@ -3,6 +3,7 @@ from . import ast
 from . import ast_base_types
 
 QuerySet = ast_base_types.QuerySet
+compile = ast_base_types.compile
 
 # For compatibility with objectpath
 def Tree(root):
