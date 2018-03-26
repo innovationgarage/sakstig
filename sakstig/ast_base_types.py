@@ -217,14 +217,19 @@ class op_bool_or(MathOp):
         return a or b
 
 class filter(Op):
-    def is_true(self, queryset):
-        return queryset and functools.reduce(lambda a, b: a and b, queryset, True)
+    def is_true_or_idx(self, queryset, idx):
+        if not queryset: return False
+        res = functools.reduce(lambda a, b: a and b, queryset, True)
+        if isinstance(res, bool):
+            return res
+        else:
+            return res == idx
         
     def __call__(self, global_qs, local_qs):
         local_qs = self.args[0](global_qs, local_qs)
         for filter in self.args[1:]:
             local_qs = QuerySet(
                 item
-                for item in local_qs
-                if self.is_true(filter(global_qs, QuerySet([item]))))
+                for idx, item in enumerate(local_qs)
+                if self.is_true_or_idx(filter(global_qs, QuerySet([item])), idx))
         return local_qs
