@@ -29,10 +29,14 @@ class SakstigGrammar(Grammar):
     p_expr = Sequence(p_round_l, START, p_round_r)
     f_expr = Sequence(p_hard_l, START, p_hard_r)
 
+    a_expr = Sequence(p_round_l, List(START, delimiter=',', mi=0, ma=None, opt=True), p_round_r)
+
     nop = Tokens("not")
     nop_expr = Sequence(nop, START)
-    
-    l_expr = Choice(s_expr, p_expr, nop_expr)
+
+    c_expr = Sequence(name, a_expr)
+
+    l_expr = Choice(s_expr, p_expr, nop_expr, c_expr)
 
     op_path = Tokens(". ..")
     op_mul = Tokens("* /")
@@ -40,7 +44,7 @@ class SakstigGrammar(Grammar):
     op_comp = Tokens("in is < > <= >=")
     op_bool = Tokens("and or")
 
-    path = List(l_expr, delimiter=op_path, mi=1, ma=None)
+    path = List(l_expr, delimiter=op_path, mi=1, ma=None)    
     fpath = Sequence(path, Repeat(f_expr, mi=0, ma=None))
     mfpath = List(fpath, delimiter=op_path, mi=1, ma=None)
     mul = List(mfpath, delimiter=op_mul, mi=1, ma=None)
@@ -107,6 +111,14 @@ class AST(object):
         return expr
     def f_expr(self, node, l, expr, r):
         return expr
+    def a_expr(self, node, *args):
+        return args[1:-1]
+    class c_expr(object):
+        def __init__(self, node, name, args):
+            self.name = name
+            self.args = args
+        def __repr__(self):
+            return "%s(%s)" % (self.name, ", ".join(repr(arg) for arg in self.args))
     class nop_expr(object):
         def __init__(self, node, nop, expr):
             self.expr = expr
@@ -135,7 +147,6 @@ class AST(object):
             return self
         def __repr__(self):
             return "%s%s" % (self.path, "".join("[%s]" % repr(filter) for filter in self.filters))
-    
         
 def format_tree(node, indent=''):
     if len(node.children) == 1:
@@ -146,19 +157,13 @@ def format_tree(node, indent=''):
         info = "=%s\n" % (node.string, )
     return "%s%s%s" % (indent, getattr(node.element, 'name', '[anon]'), info)
 
-
-#res = sakstig_grammar.parse('$..*[foo].name')
-res = sakstig_grammar.parse('$..*[@..temp > 25 and @.clouds.all is 0].name')
-#res = sakstig_grammar.parse('$.foo')
-print(res.is_valid)
-print(format_tree(res.tree))
-
-try:
-    print(AST(res.tree))
-except Exception as e:
-    print(e)
-    import pdb, sys
-    sys.last_traceback = sys.exc_info()[2]
-    pdb.pm()
-#import pdb
-#pdb.set_trace()
+if __name__ == "__main__":
+    import sys
+    res = sakstig_grammar.parse(sys.argv[1])
+    if not res.is_valid:
+        print("INVALID EXPRESSION")
+    else:
+        print("Parsed valid expression")
+        print(format_tree(res.tree))
+        print("AST")
+        print(AST(res.tree))
