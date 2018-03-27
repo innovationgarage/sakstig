@@ -7,9 +7,9 @@ def is_dict(o):
 def is_list(o):
     return hasattr(o, '__iter__') and not is_dict(o) and not is_str(o)
 def is_int(o):
-    return hasattr(o, 'real') and not hasattr(o, 'is_integer')
+    return hasattr(o, 'real') and not hasattr(o, 'is_integer') and not isinstance(o, bool)
 def is_float(o):
-    return hasattr(o, 'is_integer')
+    return hasattr(o, 'is_integer') and not isinstance(o, bool)
 
 def compile(query):
     from . import grammar
@@ -165,7 +165,6 @@ class Dict(Expr):
 
 class op_path_one(Op):
     def __call__(self, global_qs, local_qs):
-        assert isinstance(self.args[1], Name)
         return self.args[1](global_qs, self.args[0](global_qs, local_qs))
 
 class op_path_multi(Op):
@@ -235,17 +234,15 @@ class op_bool_or(MathOp):
 class filter(Op):
     def filter_qs(self, filter, global_qs, local_qs):
         for item in local_qs:
-            queryset = filter(global_qs, QuerySet([item]))
-            if not queryset:
-                continue
-            res = functools.reduce(lambda a, b: a and b, queryset, True)
-            if isinstance(res, bool):
-                if res:
-                    yield item
-            # FIXME: booleans have the exact same interface as integers!!
-            elif is_int(res):
-                yield item[res]
-
+            for filter_res in filter(global_qs, QuerySet([item])):
+                if is_int(filter_res) or is_str(filter_res):
+                    try:
+                        yield item[filter_res]
+                    except:
+                        pass
+                else:
+                    if filter_res:
+                        yield item
     def __call__(self, global_qs, local_qs):
         local_qs = self.args[0](global_qs, local_qs)
         for filter in self.args[1:]:
