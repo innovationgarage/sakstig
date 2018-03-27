@@ -26,7 +26,8 @@ def main():
             data = json.load(f)
     else:
         data = json.load(sys.stdin)
-    print(json.dumps(QuerySet([data]).execute(query)))
+    for result in QuerySet([data]).execute(query):
+        print(json.dumps(result))
 
 if __name__ == "__main__":
     main()
