@@ -6,6 +6,10 @@ def is_dict(o):
     return hasattr(o, 'values')
 def is_list(o):
     return hasattr(o, '__iter__') and not is_dict(o) and not is_str(o)
+def is_int(o):
+    return hasattr(o, 'real') and not hasattr(o, 'is_integer')
+def is_float(o):
+    return hasattr(o, 'is_integer')
 
 def compile(query):
     from . import grammar
@@ -19,10 +23,12 @@ def compile(query):
     return ast.AST(tree.tree)
     
 class QuerySet(list):
-    def execute(self, query):
+    def execute(self, query, global_qs = None):
         if not isinstance(query, Expr):
             query = compile(query)
-        return query(self, self)
+        if global_qs is None:
+            global_qs = self
+        return query(global_qs, self)
 
     def map(self, fn):
         def map():
@@ -48,6 +54,9 @@ class QuerySet(list):
                     yield item
         return QuerySet(flatten())
 
+    def __add__(self, other):
+        return type(self)(list.__add__(self, other))
+    
 class Expr(object):
     def __call__(self, global_qs, local_qs):
         raise NotImplementedError
@@ -223,12 +232,14 @@ class op_bool_or(MathOp):
 
 class filter(Op):
     def is_true_or_idx(self, queryset, idx):
-        if not queryset: return False
+        if not queryset:
+            return False
         res = functools.reduce(lambda a, b: a and b, queryset, True)
-        if isinstance(res, bool):
-            return res
-        else:
+        # FIXME: booleans have the exact same interface as integers!!
+        if is_int(res) and not isinstance(res, bool):
             return res == idx
+        else:
+            return res
         
     def __call__(self, global_qs, local_qs):
         local_qs = self.args[0](global_qs, local_qs)

@@ -42,14 +42,17 @@ class AST(object):
             return ast_base_types.Const(int(node.string))
     def t_string(self, node):
         return ast_base_types.Const(node.string[1:-1])
-    def t_null(self, node):
-        return ast_base_types.Const(None)
-    def t_true(self, node):
-        return ast_base_types.Const(True)
-    def t_false(self, node):
-        return ast_base_types.Const(False)
     def name(self, node):
-        return ast_base_types.Name(node.string)
+        name = node.string
+        name_lower = name.lower()
+        if name_lower in ('null', 'none', 'nil', 'n'):
+            return ast_base_types.Const(None)
+        elif name_lower in ('true', 't'):
+            return ast_base_types.Const(True)
+        elif name_lower in ('false', 'f'):
+            return ast_base_types.Const(False)
+        else:
+            return ast_base_types.Name(name)
     def t_array_list(self, node, *items):
         return ast_base_types.Array(
             item
@@ -93,8 +96,8 @@ class AST(object):
             return path
         return ast_base_types.Op("filter", path, *filters)
 
-if __name__ == "__main__":
-    import grammar
+def main():
+    from . import grammar
     import sys
     res = grammar.grammar.parse(sys.argv[1])
     if not res.is_valid:

@@ -5,11 +5,8 @@ class SakstigGrammar(Grammar):
 
     t_number = Regex(r'[+-]?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?')
     t_string = Regex(r"""("([^"]|(\\"))*")|('([^']|(\\'))*')""")
-    t_null = Regex(r"([nN][uU][lL][lL])|([nN][oO][nN][eE])|[nN]|([nN][iI][lL])")
-    t_true = Regex(r"([tT][rR][uU][eE])|[tT]")
-    t_false = Regex(r"([fF][aA][lL][sS][eE])|[fF]")
 
-    name = Regex(r"[a-zA-Z_$@#*]*")
+    name = Regex(r"[a-zA-Z_$@#*0-9]*")
 
     p_round_l = Regex(r"\(")
     p_round_r = Regex(r"\)")
@@ -25,8 +22,8 @@ class SakstigGrammar(Grammar):
     t_dict_list = List(t_dict_item, delimiter=',', mi=0, ma=None, opt=True)
     t_dict = Sequence(p_curly_l, t_dict_list, p_curly_r)
 
-    t = Choice(t_number, t_string, t_null, t_true, t_false, t_array, t_dict)
-    s_expr = Choice(name, t)
+    t = Choice(t_number, t_string, t_array, t_dict)
+    s_expr = Choice(t, name)
 
     p_expr = Sequence(p_round_l, START, p_round_r)
     f_expr = Sequence(p_hard_l, START, p_hard_r)
@@ -84,7 +81,7 @@ def format_tree(node, indent=''):
         info = "=%s\n" % (node.string, )
     return "%s%s%s" % (indent, getattr(node.element, 'name', '[anon]'), info)
 
-if __name__ == "__main__":
+def main():
     import sys
     res = grammar.parse(sys.argv[1])
     if not res.is_valid:
