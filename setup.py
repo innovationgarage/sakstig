@@ -20,5 +20,6 @@ setuptools.setup(name='sakstig',
       sakstig = sakstig:main
       sakstig-grammar = sakstig.grammar:main
       sakstig-ast = sakstig.ast:main
+      sakform = sakform:main
       '''
   )

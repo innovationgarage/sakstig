@@ -76,6 +76,8 @@ class Registry(type):
         if 'abstract' not in members:
             if name.startswith("_"):
                 name = name[1:]
+            if '__name__' in members:
+                name = members['__name__']
             cls._registry[name] = cls
     
 class Op(Expr, metaclass=Registry):
