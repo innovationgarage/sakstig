@@ -27,21 +27,25 @@ def transform(data, template, debug=False, debug_path=False):
             print("=> %s" % repr(res))
         return res
     
-    def transform(qs, template):
+    def transform(global_qs, local_qs, template):
         if sakstig.is_dict(template):
-            result = sakstig.QuerySet([{
-                key: value[0]
-                for key, value in
-                ((key, transform(qs, value))
-                 for key, value in template.items()
-                 if key != "$")
-                if value}])
             if '$' in template:
-                result = path(qs, result, template["$"])
+                result = path(global_qs, local_qs, template["$"])
+            else:
+                result = sakstig.QuerySet([{}])
+            if set(template.keys()) - set(('$',)):
+                result = sakstig.QuerySet(
+                    {key: value[0]
+                     for key, value in
+                     ((key, transform(global_qs, sakstig.QuerySet([item]), value))
+                      for key, value in template.items()
+                      if key != "$")
+                     if value}
+                    for item in result)
             return result
         elif sakstig.is_list(template):
             return sakstig.QuerySet([list(sakstig.QuerySet(
-                transform(qs, item)
+                transform(global_qs, local_qs, item)
                 for item in template).flatten())])
         else:
             return sakstig.QuerySet([template])
@@ -54,7 +58,7 @@ def transform(data, template, debug=False, debug_path=False):
     if not isinstance(data, sakstig.QuerySet):
         data = sakstig.QuerySet([data])
     
-    res = transform(data, template)
+    res = transform(data, template_qs, template)
 
     if debug:
         print("=> %s" % repr(res))
@@ -71,5 +75,5 @@ def main():
             data = json.load(f)
     else:
         data = json.load(sys.stdin)
-    print(json.dumps(transform(data, template)))
-
+    for result in transform(data, template):
+        print(json.dumps(result))

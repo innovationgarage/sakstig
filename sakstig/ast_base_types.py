@@ -239,11 +239,12 @@ class filter(Op):
             if not queryset:
                 continue
             res = functools.reduce(lambda a, b: a and b, queryset, True)
+            if isinstance(res, bool):
+                if res:
+                    yield item
             # FIXME: booleans have the exact same interface as integers!!
-            if is_int(res) and not isinstance(res, bool):
+            elif is_int(res):
                 yield item[res]
-            else:
-                yield item                
 
     def __call__(self, global_qs, local_qs):
         local_qs = self.args[0](global_qs, local_qs)
