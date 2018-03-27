@@ -233,21 +233,20 @@ class op_bool_or(MathOp):
         return a or b
 
 class filter(Op):
-    def is_true_or_idx(self, queryset, idx):
-        if not queryset:
-            return False
-        res = functools.reduce(lambda a, b: a and b, queryset, True)
-        # FIXME: booleans have the exact same interface as integers!!
-        if is_int(res) and not isinstance(res, bool):
-            return res == idx
-        else:
-            return res
-        
+    def filter_qs(self, filter, global_qs, local_qs):
+        for item in local_qs:
+            queryset = filter(global_qs, QuerySet([item]))
+            if not queryset:
+                continue
+            res = functools.reduce(lambda a, b: a and b, queryset, True)
+            # FIXME: booleans have the exact same interface as integers!!
+            if is_int(res) and not isinstance(res, bool):
+                yield item[res]
+            else:
+                yield item                
+
     def __call__(self, global_qs, local_qs):
         local_qs = self.args[0](global_qs, local_qs)
         for filter in self.args[1:]:
-            local_qs = QuerySet(
-                item
-                for idx, item in enumerate(local_qs)
-                if self.is_true_or_idx(filter(global_qs, QuerySet([item])), idx))
+            local_qs = QuerySet(self.filter_qs(filter, global_qs, local_qs))
         return local_qs
