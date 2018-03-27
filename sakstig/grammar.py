@@ -58,8 +58,9 @@ class SakstigGrammar(Grammar):
     op_bool_or = Token("or")
     op_bool = Choice(op_bool_and, op_bool_or)
 
-    path = List(l_expr, delimiter=op_path, mi=1, ma=None)    
-    fpath = Sequence(path, Repeat(f_expr, mi=0, ma=None))
+    path = List(l_expr, delimiter=op_path, mi=1, ma=None)
+    filters = Repeat(f_expr, mi=0, ma=None)
+    fpath = Sequence(path, filters)
     mfpath = List(fpath, delimiter=op_path, mi=1, ma=None)
     mul = List(mfpath, delimiter=op_mul, mi=1, ma=None)
     add = List(mul, delimiter=op_add, mi=1, ma=None)

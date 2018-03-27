@@ -8,7 +8,12 @@ class AST(object):
     def _build_ast(self, node):
         name = getattr(node.element, 'name', None)
         if name is not None and hasattr(self, name):
-            return getattr(self, name)(node, *(self._build_ast(child) for child in node.children))
+            children = [self._build_ast(child) for child in node.children]
+            try:
+                return getattr(self, name)(node, *children)
+            except Exception as e:
+                e.args = ("Unable to instantiate %s(%s)" % (name, ", ".join(repr(child) for child in children)),) + e.args
+                raise                
         elif len(node.children) == 1:
             return self._build_ast(node.children[0])
         elif node.children:
@@ -17,7 +22,14 @@ class AST(object):
             children = children[1:]
             while children:
                 opname = getattr(children[0].element, 'name', None)
-                left = getattr(self, opname)(children[0], left, self._build_ast(children[1]))
+                if len(children) < 2:
+                    raise Exception("Missing right-hand side to operator at %s(%s, MISSING) (node.element=%s)" % (opname, repr(left), name))
+                right = self._build_ast(children[1])
+                try:
+                    left = getattr(self, opname)(children[0], left, right)
+                except Exception as e:
+                    e.args = ("Unable to instantiate %s(%s, %s)" % (opname, repr(left), repr(right)),) + e.args
+                    raise
                 children = children[2:]
             return left
         else:
@@ -90,8 +102,9 @@ class AST(object):
     op_add = op
     op_comp = op
     op_bool = op
-    def fpath(self, node, path, *filters):
-        filters = [f for f in filters if not isinstance(f, self.sep)]
+    def filters(self, node, *filters):
+        return filters
+    def fpath(self, node, path, filters):
         if not filters:
             return path
         return ast_base_types.Op("filter", path, *filters)

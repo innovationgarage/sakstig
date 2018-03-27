@@ -67,7 +67,7 @@ class Const(Expr):
     def __call__(self, global_qs, local_qs):
         return QuerySet([self.value])
     def __repr__(self):
-        return "%s" % self.value
+        return repr(self.value)
 
 class Registry(type):
     _registry = {}
