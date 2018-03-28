@@ -39,18 +39,16 @@ class QuerySet(list):
                     pass
         return QuerySet(map())
 
-    def flatten(self):
+    def flatten(self, children_only=False):
         def flatten():
             for item in self:
-                if is_str(item):
-                    yield item
-                elif is_dict(item):
+                if is_dict(item):
                     for value in item.values():
                         yield value
                 elif is_list(item):
                     for value in item:
                         yield value
-                else:
+                elif not children_only:
                     yield item
         return QuerySet(flatten())
 
@@ -130,12 +128,9 @@ class Name(Expr):
         elif self.name == "@":
             return local_qs        
         elif self.name == "*":
-            return QuerySet(child_item
-                            for item in local_qs
-                            for child_item in children(item))
+            return local_qs.flatten(children_only=True)
         else:
-            return QuerySet(item[self.name] for item in local_qs
-                            if self.name in item)
+            return local_qs.map(lambda item: item[self.name])
     def __repr__(self):
         return "%s" % (self.name,)
 
