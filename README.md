@@ -56,7 +56,7 @@ one is used. However, whenever {"$": "expression"} is used inside a
 list, all results are merged into the list:
 
     >>> sakform.transform(data, {"prices": [47, {"$": "$.store.book.*.price"}, 11], "description": "Book prices"})
-    {"prices": [47, 4, 5, 11], "description": "Book prices"}
+    {"prices": [47, 4, 5, 6, 11], "description": "Book prices"}
 
 If the object containing '$' also contains other members, a mapping is
 performed on the matches, replacing them with an object with those
@@ -64,5 +64,5 @@ members. The matched object is however available as @template() from
 within SakStig expressions inside these members:
 
     >>> sakform.transform(data, {"books": [{"$": "$.store.book.*", "BOOK_PRICE": {"$": "@template().price"}}]})
-    {"books": [{"BOOK_PRICE": 4}, {"BOOK_PRICE": 5}]}
+    {"books": [{"BOOK_PRICE": 4}, {"BOOK_PRICE": 5}, {"BOOK_PRICE": 6}]}
 
