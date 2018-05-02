@@ -1,4 +1,4 @@
-# An objectpath query and templating engine engine
+# An objectpath query and templating engine
 
 SakStig is an [objectpath](http://objectpath.org) implementation that uses proper querysets and supports querying
 any python object that supports the dict or list interfaces (the default implementation only supports the real dict and list types).
