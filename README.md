@@ -72,16 +72,24 @@ A template consist of JSON entities which are evaluated recursively on some inpu
 
 #### The template is an object
 
-* If the template contains a member named `$`, its value is evaluated as a SakStig expression, and @template()
-  is set to the queryset result for the rest of the template evaluation (including recursive evaluations).
-  Otherwize `@template()` is left unchanged.
-* If the template does not contain any other members than `$`, the value of `@template()` is returned and evaluation ends.
-* Each queryset entry in `@template()` is transformed and the resulting queryset returned:
- * A new empty output object is created.
- * For each member of the template:
-  * The template member value is evaluated as a template recursively.
-   * If the recursive evaluation generates an empty queryset, the member is ignored
-   * Otherwize the a member with the same name is created in the output object and set to the first value of the queryset.
+* If the template contains a member named `$`
+ * The value of `template.$` is evaluated as a SakStig expression to form an `input` queryset.
+ * If the template does not contain any other members than `$`, `input` is returned and evaluation ends.
+ * Each `input` entry is transformed to form an `output` queryset which is returned:
+  * `@template` is set to a queryset containing only the current `input` entry.
+  * A new empty `output_object` is created and added to `output`.
+  * For each `member` of the template:
+   * `member.value` is evaluated recursively as a template to form a `value` queryset.
+   * If `value` is the empty queryset, the member is ignored.
+   * `output_object[member.name]` is set to the first entry in the `value` queryset.
+   
+* If the template does not contain a member named `$`
+ * A new empty `output_object` is created
+ * For each `member` of the template:
+  * `member.value` is evaluated recursively as a template to form a `value` queryset.
+  * If `value` is the empty queryset, the member is ignored.
+  * `output_object[member.name]` is set to the first entry in the `value` queryset.
+ * `output_object` is returned as a single member of a queryset.
 
 #### The template is an array
 * Each array member is evaluated recursively as a template.
