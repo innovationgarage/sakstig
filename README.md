@@ -40,66 +40,8 @@ Note that while a QuerySet inherits from the python list type, it isn't to be se
 A SakForm template is a valid JSON document. It is applied to a data
 JSON document to produce an output JSON document. Values in the
 template are copied to the output verbatim, except for the special
-object member "$", which has special semantics and allows you to do
-powerfull transformations using SakStig expressions.
+object member "$", which allows you to do powerfull transformations
+using SakStig expressions.
 
-### Examples
-We'll be using the same test.json from above for all examples below.
-
-In its simplest form, $ allows you to extract a value from the data
-document:
-
-    >>> sakform.transform(data, {"price": {"$": "$.store.book[0].price"}, "description": "First book price"})
-    {"price": 4, "description": "First book price"}
-
-Normally, if the exression returns multiple matches, only the first
-one is used. However, whenever {"$": "expression"} is used inside a
-list, all results are merged into the list:
-
-    >>> sakform.transform(data, {"prices": [47, {"$": "$.store.book.*.price"}, 11], "description": "Book prices"})
-    {"prices": [47, 4, 5, 6, 11], "description": "Book prices"}
-
-If the object containing '$' also contains other members, a mapping is
-performed on the matches, replacing them with an object with those
-members. The matched object is however available as @template() from
-within SakStig expressions inside these members:
-
-    >>> sakform.transform(data, {"books": [{"$": "$.store.book.*", "BOOK_PRICE": {"$": "@template().price"}}]})
-    {"books": [{"BOOK_PRICE": 4}, {"BOOK_PRICE": 5}, {"BOOK_PRICE": 6}]}
-
-### Template semantics
-A template consist of JSON entities which are evaluated recursively on some input queryset available as `$` to SakStig expressions. Initially, the template context `@template()` is set to the same as `$`. The output is a queryset.
-
-#### The template is an object
-
-##### If the template contains a member named `$`
-
-  * The value of `template.$` is evaluated as a SakStig expression to form an `input` queryset.
-  * If the template does not contain any other members than `$`, `input` is returned and evaluation ends.
-  * Each `input` entry is transformed to form a new queryset which is returned.
-
-`input` entry transform:
-
-  * `@template` is set to a queryset containing only the current `input` entry.
-  * A new empty `output` object is created.
-  * For each `member` of the template:
-    - `member.value` is evaluated recursively as a template to form a `value` queryset.
-    - If `value` is the empty queryset, the member is ignored.
-    - `output[member.name]` is set to the first entry in the `value` queryset.
-   
-##### If the template does not contain a member named `$`
-
-  * A new empty `output_object` is created
-  * For each `member` of the template:
-    - `member.value` is evaluated recursively as a template to form a `value` queryset.
-    - If `value` is the empty queryset, the member is ignored.
-    - `output_object[member.name]` is set to the first entry in the `value` queryset.
-  * `output_object` is returned as a single member of a queryset.
-
-#### The template is an array
-  * Each array member is evaluated recursively as a template.
-  * All the resulting querysets are concatenated and converted into a JSON array
-    which is returned as a single member of a queryset.
-
-#### Other values
-All other values are returned verbatim as a single member of a queryset.
+* [SakForm examples](SakForm_examples.md)
+* [SakForm semantics](SakForm_semantics.md)
