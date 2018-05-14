@@ -43,6 +43,7 @@ template are copied to the output verbatim, except for the special
 object member "$", which has special semantics and allows you to do
 powerfull transformations using SakStig expressions.
 
+### Examples
 We'll be using the same test.json from above for all examples below.
 
 In its simplest form, $ allows you to extract a value from the data
@@ -66,3 +67,26 @@ within SakStig expressions inside these members:
     >>> sakform.transform(data, {"books": [{"$": "$.store.book.*", "BOOK_PRICE": {"$": "@template().price"}}]})
     {"books": [{"BOOK_PRICE": 4}, {"BOOK_PRICE": 5}, {"BOOK_PRICE": 6}]}
 
+### Template semantics
+A template consist of JSON entities which are evaluated recursively on some input queryset available as `$` to SakStig expressions. Initially, the template context `@template()` is set to the same as `$`. The output is a queryset.
+
+#### The template is an object
+
+* If the template contains a member named `$`, its value is evaluated as a SakStig expression, and @template()
+  is set to the queryset result for the rest of the template evaluation (including recursive evaluations).
+  Otherwize `@template()` is left unchanged.
+* If the template does not contain any other members than `$`, the value of `@template()` is returned and evaluation ends.
+* Each queryset entry in `@template()` is transformed and the resulting queryset returned:
+ * A new empty output object is created.
+ * For each member of the template:
+  * The template member value is evaluated as a template recursively.
+   * If the recursive evaluation generates an empty queryset, the member is ignored
+   * Otherwize the a member with the same name is created in the output object and set to the first value of the queryset.
+
+#### The template is an array
+* Each array member is evaluated recursively as a template.
+* All the resulting querysets are concatenated and converted into a JSON array
+  which is returned as a single member of a queryset.
+
+#### Other values
+All other values are returned verbatim as a single member of a queryset.
