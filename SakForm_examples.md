@@ -11,7 +11,7 @@ We'll be using the following test.json for all examples below:
     }
 
 # Examples
-In its simplest form, $ allows you to extract a value from the data
+In its simplest form, `$` allows you to extract a value from the data
 document:
 
     >>> sakform.transform(data,
@@ -20,7 +20,7 @@ document:
     {"price": 4, "description": "First book price"}
 
 Normally, if the exression returns multiple matches, only the first
-one is used. However, whenever {"$": "expression"} is used inside a
+one is used. However, whenever `{"$": "expression"}` is used inside a
 list, all results are merged into the list:
 
     >>> sakform.transform(data,
@@ -28,9 +28,9 @@ list, all results are merged into the list:
     ...     "description": "Book prices"})
     {"prices": [47, 4, 5, 6, 11], "description": "Book prices"}
 
-If the object containing '$' also contains other members, a mapping is
+If the object containing `$` also contains other members, a mapping is
 performed on the matches, replacing them with an object with those
-members. The matched object is however available as @template() from
+members. The matched object is however available as `@template()` from
 within SakStig expressions inside these members:
 
     >>> sakform.transform(data,
