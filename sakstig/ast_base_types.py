@@ -6,6 +6,8 @@ def is_dict(o):
     return hasattr(o, 'values')
 def is_list(o):
     return hasattr(o, '__iter__') and not is_dict(o) and not is_str(o)
+def is_set(o):
+    return hasattr(o, 'union')
 def is_int(o):
     return hasattr(o, 'real') and not hasattr(o, 'is_integer') and not isinstance(o, bool)
 def is_float(o):
@@ -188,6 +190,13 @@ class op_mul_div(MathOp):
     
 class op_add_add(MathOp):
     def op(self, a, b):
+        if is_dict(a) and is_dict(b):
+            res = {}
+            res.update(a)
+            res.update(b)
+            return res
+        elif is_set(a) and is_set(a):
+            return a.union(b)
         return a + b
 
 class op_add_sub(MathOp):
