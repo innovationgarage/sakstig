@@ -1,0 +1,3 @@
+[{"$": "$.store.book.*[@.price > 10]",
+ "foo": "bar",
+ "nana": {"$": "@template().author"}}]
