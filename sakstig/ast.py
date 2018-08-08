@@ -102,6 +102,7 @@ class AST(object):
     op_add = op
     op_comp = op
     op_bool = op
+    op_union = op
     def filters(self, node, *filters):
         return filters
     def fpath(self, node, path, filters):

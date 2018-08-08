@@ -23,3 +23,23 @@ We'll be using the following test.json for all examples below:
     7
     8
     9
+
+    localhost$ sakstig "$.store.book.*.title" test.json
+    foo
+    bar
+    fie
+
+    localhost$ sakstig "[$.store.book.*.title]" test.json
+    ['foo', 'bar', 'fie']
+    
+
+    localhost$ sakstig "$.store.book.*.title,$.store.book.*.price" test.json
+    foo
+    bar
+    fie
+    4
+    5
+    6
+
+    localhost$ sakstig "[$.store.book.*.title,$.store.book.*.price]" test.json
+    ['foo', 'bar', 'fie', 4, 5, 6]

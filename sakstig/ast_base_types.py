@@ -235,6 +235,15 @@ class op_bool_or(MathOp):
     def op(self, a, b):
         return a or b
 
+class op_union_union(Op):
+    def __call__(self, global_qs, local_qs):
+        def result():
+            for a in self.args[0](global_qs, local_qs):
+                yield a
+            for b in self.args[1](global_qs, local_qs):
+                yield b
+        return QuerySet(result())
+    
 class filter(Op):
     def filter_qs(self, filter, global_qs, local_qs):
         for item in local_qs:
