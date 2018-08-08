@@ -25,6 +25,9 @@ def compile(query):
     return ast.AST(tree.tree)
     
 class QuerySet(list):
+    def __repr__(self):
+        return "%s\n" % ("\n".join(repr(item) for item in self))
+
     def execute(self, query, global_qs = None):
         if not isinstance(query, Expr):
             query = compile(query)
