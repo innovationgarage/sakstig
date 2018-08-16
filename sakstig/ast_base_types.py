@@ -46,12 +46,16 @@ class QuerySet(list):
                     pass
         return QuerySet(map())
 
-    def flatten(self, children_only=False):
+    def flatten(self, children_only=False, no_dict=False):
         def flatten():
             for item in self:
                 if is_dict(item):
-                    for value in item.values():
-                        yield value
+                    if no_dict:
+                        if not children_only:
+                            yield item
+                    else:
+                        for value in item.values():
+                            yield value
                 elif is_list(item):
                     for value in item:
                         yield value
