@@ -33,3 +33,14 @@ class join(ast_base_types.Function):
             res += joiner
             res += item
         return ast_base_types.QuerySet([res])
+
+class keys(ast_base_types.Function):
+    def call(self, global_qs, local_qs, args):
+        def result():
+            for item in args[0]:
+                if ast_base_types.is_dict(item):
+                    for key in item.keys():
+                        yield key
+        return ast_base_types.QuerySet(result())
+
+        

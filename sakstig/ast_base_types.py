@@ -30,6 +30,8 @@ class QuerySet(list):
 
     def execute(self, query, global_qs = None):
         if not isinstance(query, Expr):
+            if not isinstance(query, str):
+                return QuerySet([query])
             query = compile(query)
         if global_qs is None:
             global_qs = self
@@ -220,7 +222,8 @@ class op_mul_mod(MathOp):
     
 class op_add_add(MathOp):
     def op(self, a, b):
-        b = type(a)(b)        
+        if not (isinstance(a, int) and isinstance(b, float)):
+            b = type(a)(b)
         if is_dict(a) and is_dict(b):
             res = {}
             res.update(a)
@@ -244,8 +247,14 @@ class op_comp_not_in(MathOp):
 
 class op_comp_is(MathOp):
     def op(self, a, b):
+        if a == b:
+            return True
+        try:
+            b = type(a)(b)
+        except:
+            return False
         return a == b
-
+            
 class op_comp_is_not(MathOp):
     def op(self, a, b):
         return a != b

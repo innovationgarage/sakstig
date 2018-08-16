@@ -13,6 +13,8 @@ def execute(expr):
     r=optest.tree1.execute(expr)
     if len(r) == 1:
         return r[0]
+    elif len(r) == 0:
+        return None
     return r        
 optest.execute = execute
             
@@ -20,6 +22,8 @@ def execute2(expr):
     r=optest.tree2.execute(expr)
     if len(r) == 1:
         return r[0]
+    elif len(r) == 0:
+        return None
     return r
 optest.execute2 = execute2
 
