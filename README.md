@@ -17,3 +17,11 @@ using SakStig expressions.
 
 * [SakForm examples](SakForm_examples.md)
 * [SakForm semantics](SakForm_semantics.md)
+
+# Tests
+
+To run the tests
+
+    git clone git@github.com:adriank/ObjectPath.git
+    pip install nose
+    nosetests -v tests
