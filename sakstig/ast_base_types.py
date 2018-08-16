@@ -33,7 +33,7 @@ class QuerySet(list):
             query = compile(query)
         if global_qs is None:
             global_qs = self
-        return query(global_qs, self)
+        return query(global_qs, None)
 
     def map(self, fn):
         def map():
@@ -134,6 +134,8 @@ class Name(Expr):
             return local_qs        
         elif self.name == "*":
             return local_qs.flatten(children_only=True)
+        elif local_qs is None:
+            return QuerySet([self.name])
         else:
             return local_qs.map(lambda item: item[self.name])
     def __repr__(self):
@@ -232,8 +234,12 @@ class op_add_sub(MathOp):
         return a - b
 
 class op_comp_in(MathOp):
-    def op(a, b):
+    def op(self, a, b):
         return a in b
+
+class op_comp_not_in(MathOp):
+    def op(self, a, b):
+        return a not in b
 
 class op_comp_is(MathOp):
     def op(self, a, b):
@@ -253,7 +259,7 @@ class op_comp_gt(MathOp):
 
 class op_comp_lte(MathOp):
     def op(self, a, b):
-        return a >= b
+        return a <= b
 
 class op_comp_gte(MathOp):
     def op(self, a, b):
@@ -266,6 +272,13 @@ class op_bool_and(MathOp):
 class op_bool_or(MathOp):
     def op(self, a, b):
         return a or b
+
+class nop_expr(Op):
+    def __call__(self, global_qs, local_qs):
+        def result():
+            for a in self.args[0](global_qs, local_qs):
+                yield not a
+        return QuerySet(result())
 
 class op_union_union(Op):
     def __call__(self, global_qs, local_qs):

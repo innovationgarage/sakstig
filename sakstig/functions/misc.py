@@ -11,7 +11,7 @@ class _type(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         def t(o):
             if ast_base_types.is_str(o):
-                return 'string'
+                return 'str'
             elif ast_base_types.is_dict(o):
                 return 'object'
             elif ast_base_types.is_list(o):

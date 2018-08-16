@@ -97,7 +97,7 @@ class AST(object):
     def c_expr(self, node, name, args):
         return ast_base_types.Function(name.name, *args)
     def nop_expr(self, node, nop, expr):
-        return ast_base_types.Op("not", expr)
+        return ast_base_types.Op("nop_expr", expr)
     def op(self, node, left, right):
         return ast_base_types.Op(node.children[0].element.name, left, right)
     op_path = op
