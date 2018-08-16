@@ -6,8 +6,8 @@ class sort(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         kw = {}
         if len(args) > 1:
-            kw["key"] = args[1][0]
-        return ast_base_types.QuerySet([list(sorted(args[0].flatten(), *kw))])
+            kw["key"] = lambda a: a[args[1][0]]
+        return ast_base_types.QuerySet([list(sorted(args[0].flatten(), **kw))])
 
 class reverse(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):

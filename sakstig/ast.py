@@ -48,13 +48,14 @@ class AST(object):
         def __repr__(self):
             return "<%s>" % self.str
     def t_number(self, node):
-        if 'e' in node.string or '.' in node.string:
-            return ast_base_types.Const(float(node.string))
+        s = node.string.replace("+", "").replace("--", "")
+        if 'e' in s or '.' in s:
+            return ast_base_types.Const(float(s))
         else:
-            return ast_base_types.Const(int(node.string))
+            return ast_base_types.Const(int(s))
     def t_string(self, node):
         return ast_base_types.Const(node.string[1:-1])
-    def name(self, node):
+    def simple_name(self, node):
         name = node.string
         name_lower = name.lower()
         if name_lower in ('null', 'none', 'nil', 'n'):
@@ -65,6 +66,8 @@ class AST(object):
             return ast_base_types.Const(False)
         else:
             return ast_base_types.Name(name)
+    def star(self, node):
+        return ast_base_types.Name("*")
     def t_array_list(self, node, *items):
         return ast_base_types.Array(
             item

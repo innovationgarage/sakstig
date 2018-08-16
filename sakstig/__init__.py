@@ -17,6 +17,13 @@ QuerySet = ast_base_types.QuerySet
 def Tree(root):
     return QuerySet([root])
 
+ProgrammingError = SyntaxError
+ExecutionError = ValueError
+generator = chain = QuerySet
+NUM_TYPES = [int, float]
+ITER_TYPES = [list, tuple]
+STR_TYPES = [str]
+
 def main():
     import sys
     import json

@@ -111,9 +111,9 @@ class Function(Op):
         return "%s(%s)" % (self.name, ", ".join(repr(arg) for arg in self.args))
 
 def children(item):
-    if hasattr(item, "values"):
+    if is_dict(item):
         return item.values()
-    elif hasattr(item, "__iter__"):
+    elif is_list(item):
         return iter(item)
     else:
         return []
@@ -170,7 +170,7 @@ class op_path_one(Op):
 class op_path_multi(Op):
     def __call__(self, global_qs, local_qs):
         assert isinstance(self.args[1], Name)
-        return self.args[1](global_qs, descendants(self.args[0](global_qs, local_qs)))
+        return self.args[1](global_qs, QuerySet(descendants(self.args[0](global_qs, local_qs))))
 
 class MathOp(Op):
     abstract = True
@@ -180,9 +180,30 @@ class MathOp(Op):
         def result():
             for a in self.args[0](global_qs, local_qs):
                 for b in self.args[1](global_qs, local_qs):
-                    yield self.op(a, b)
+                    yield self._op(a, b)
         return QuerySet(result())
-
+    def _op(self, a, b):
+        if a is None:
+            if is_dict(b):
+                a = {}
+            elif is_list(b):
+                a = []
+            elif is_set(b):
+                a = set()
+            else:
+                a = 0
+        if b is None:
+            if is_dict(a):
+                b = {}
+            elif is_list(a):
+                b = []
+            elif is_set(a):
+                b = set()
+            else:
+                b = 0
+        return self.op(a, b)
+    
+    
 class op_mul_mul(MathOp):
     def op(self, a, b):
         return a * b
@@ -190,6 +211,10 @@ class op_mul_mul(MathOp):
 class op_mul_div(MathOp):
     def op(self, a, b):
         return a / b
+
+class op_mul_mod(MathOp):
+    def op(self, a, b):
+        return a % b
     
 class op_add_add(MathOp):
     def op(self, a, b):
@@ -213,6 +238,10 @@ class op_comp_in(MathOp):
 class op_comp_is(MathOp):
     def op(self, a, b):
         return a == b
+
+class op_comp_is_not(MathOp):
+    def op(self, a, b):
+        return a != b
 
 class op_comp_lt(MathOp):
     def op(self, a, b):
