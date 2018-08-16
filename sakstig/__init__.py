@@ -14,8 +14,16 @@ compile = ast_base_types.compile
 QuerySet = ast_base_types.QuerySet
 
 # For compatibility with objectpath
-def Tree(root):
-    return QuerySet([root])
+class Tree(object):
+    def __init__(self, obj):
+        self.queryset = QuerySet([obj])
+    def execute(self, query):
+        r=self.queryset.execute(query)
+        if len(r) == 1:
+            return r[0]
+        elif len(r) == 0:
+            return None
+        return r
 
 ProgrammingError = Exception
 ExecutionError = Exception
