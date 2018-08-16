@@ -33,7 +33,7 @@ class title(ast_base_types.Function):
 
 class split(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
-        return args[0].map(lambda s: s.split(*args[1:]))
+        return args[0].map(lambda s: s.split(*(arg[0] for arg in args[1:])))
 
 class slice(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):

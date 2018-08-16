@@ -30,8 +30,8 @@ class join(ast_base_types.Function):
             return type(joiner)()
         res = items[0]
         for item in items[1:]:
-            res += joiner
-            res += item
+            res += type(res)(joiner)
+            res += type(res)(item)
         return ast_base_types.QuerySet([res])
 
 class keys(ast_base_types.Function):
