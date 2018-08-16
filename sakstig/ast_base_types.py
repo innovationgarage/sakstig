@@ -1,4 +1,5 @@
 import functools
+import datetime
 
 def is_str(o):
     return hasattr(o, 'split')
@@ -12,6 +13,14 @@ def is_int(o):
     return hasattr(o, 'real') and not hasattr(o, 'is_integer') and not isinstance(o, bool)
 def is_float(o):
     return hasattr(o, 'is_integer') and not isinstance(o, bool)
+def is_timedelta(o):
+    return hasattr(o, 'total_seconds')
+def is_datetime(o):
+    return hasattr(o, 'year') and hasattr(o, 'hour')
+def is_date(o):
+    return hasattr(o, 'year') and not hasattr(o, 'hour')
+def is_time(o):
+    return not hasattr(o, 'year') and hasattr(o, 'hour')
 
 def compile(query):
     from . import grammar
@@ -239,6 +248,10 @@ class op_add_add(MathOp):
 
 class op_add_sub(MathOp):
     def op(self, a, b):
+        if is_time(a):
+            a = datetime.datetime.combine(datetime.datetime(1970,1,1), a)
+        if is_time(b):
+            b = datetime.datetime.combine(datetime.datetime(1970,1,1), b)
         return a - b
 
 class op_comp_in(MathOp):

@@ -3,3 +3,4 @@ from . import arithmetic
 from . import string
 from . import array
 from . import misc
+from . import time
