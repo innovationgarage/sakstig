@@ -220,6 +220,7 @@ class op_mul_mod(MathOp):
     
 class op_add_add(MathOp):
     def op(self, a, b):
+        b = type(a)(b)        
         if is_dict(a) and is_dict(b):
             res = {}
             res.update(a)

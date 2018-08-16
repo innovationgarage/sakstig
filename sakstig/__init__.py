@@ -17,7 +17,7 @@ QuerySet = ast_base_types.QuerySet
 def Tree(root):
     return QuerySet([root])
 
-ProgrammingError = SyntaxError
+ProgrammingError = ValueError
 ExecutionError = ValueError
 generator = chain = QuerySet
 NUM_TYPES = [int, float]
