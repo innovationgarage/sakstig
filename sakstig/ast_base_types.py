@@ -257,7 +257,13 @@ class op_comp_is(MathOp):
             
 class op_comp_is_not(MathOp):
     def op(self, a, b):
-        return a != b
+        if a == b:
+            return False
+        try:
+            b = type(a)(b)
+        except:
+            return True
+        return not a == b
 
 class op_comp_lt(MathOp):
     def op(self, a, b):
