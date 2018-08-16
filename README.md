@@ -20,7 +20,8 @@ using SakStig expressions.
 
 # Tests
 
-To run the tests
+This repository uses the tests of ObjectPath to verify compatibility.
+To run the tests you need to clone ObjectPath:
 
     git clone git@github.com:adriank/ObjectPath.git
     pip install nose
