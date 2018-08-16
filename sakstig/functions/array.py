@@ -51,6 +51,8 @@ class keys(ast_base_types.Function):
                 if ast_base_types.is_dict(item):
                     for key in item.keys():
                         yield key
+                else:
+                    raise ValueError(item)
         return ast_base_types.QuerySet(result())
 
         
