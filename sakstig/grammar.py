@@ -6,6 +6,7 @@ class SakstigGrammar(Grammar):
     
     t_number = Regex(r'[+-]*[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?')
     t_string = Regex(r"""("([^"]|(\\"))*")|('([^']|(\\'))*')""")
+    t_regexp = Regex(r"""/([^/]|(\\/))*/""")
 
     simple_name = Regex(r"[a-zA-Z_$@#0-9]*")
     star = Regex(r"[*]")
@@ -25,7 +26,7 @@ class SakstigGrammar(Grammar):
     t_dict_list = List(t_dict_item, delimiter=',', mi=0, ma=None, opt=True)
     t_dict = Sequence(p_curly_l, t_dict_list, p_curly_r)
 
-    t = Choice(t_number, t_string, t_array, t_dict)
+    t = Choice(t_number, t_string, t_regexp, t_array, t_dict)
     s_expr = Choice(t, name)
 
     p_expr = Sequence(p_round_l, START, p_round_r)
@@ -59,7 +60,8 @@ class SakstigGrammar(Grammar):
     op_comp_gt = Token(">")
     op_comp_lte = Token("<=")
     op_comp_gte = Token(">=")
-    op_comp = Choice(op_comp_in, op_comp_not_in, op_comp_is, op_comp_is_not, op_comp_lt, op_comp_gt, op_comp_lte, op_comp_gte)
+    op_comp_regexp = Token("matches")
+    op_comp = Choice(op_comp_in, op_comp_not_in, op_comp_is, op_comp_is_not, op_comp_lt, op_comp_gt, op_comp_lte, op_comp_gte, op_comp_regexp)
     op_bool_and = Token("and")
     op_bool_or = Token("or")
     op_bool = Choice(op_bool_and, op_bool_or)

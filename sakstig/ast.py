@@ -1,5 +1,6 @@
 from . import ast_base_types
 from . import functions
+import re
 
 class AST(object):
     def __new__(cls, node):
@@ -55,6 +56,8 @@ class AST(object):
             return ast_base_types.Const(int(s))
     def t_string(self, node):
         return ast_base_types.Const(node.string[1:-1])
+    def t_regexp(self, node):
+        return ast_base_types.Const(re.compile(node.string[1:-1]))
     def simple_name(self, node):
         name = node.string
         name_lower = name.lower()

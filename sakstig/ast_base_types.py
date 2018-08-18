@@ -1,8 +1,11 @@
 import functools
 import datetime
+import re
 
 def is_str(o):
-    return hasattr(o, 'split')
+    return hasattr(o, 'lower')
+def is_regexp(o):
+    return hasattr(i, 'search')
 def is_dict(o):
     return hasattr(o, 'values')
 def is_list(o):
@@ -297,6 +300,16 @@ class op_comp_lte(MathOp):
 class op_comp_gte(MathOp):
     def op(self, a, b):
         return a >= b
+
+class op_comp_regexp(MathOp):
+    def op(self, a, b):
+        if is_str(a):
+            a = re.compile(a)
+        res = a.match(b)
+        if not res: return False
+        if len(res.groups()) == 0:
+            return True
+        return res.groups()
 
 class op_bool_and(MathOp):
     def op(self, a, b):
