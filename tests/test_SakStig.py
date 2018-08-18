@@ -13,3 +13,4 @@ import ObjectPath.tests.test_ObjectPath
 ObjectPath.tests.test_ObjectPath.re = re # Bug workaround
 
 from ObjectPath.tests.test_ObjectPath import ObjectPath
+from ObjectPath.tests.test_ObjectPath import ObjectPath_Paths
