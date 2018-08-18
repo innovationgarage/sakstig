@@ -1,6 +1,7 @@
 # Misc functions
 
 from .. import ast_base_types
+from .. import queryset
 from .. import typeinfo
 import uuid
 try:
@@ -23,7 +24,7 @@ class _type(ast_base_types.Function):
 
 class generateID(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
-        return ast_base_types.QuerySet([str(uuid.uuid4())])
+        return queryset.QuerySet([str(uuid.uuid4())])
 
 class matches(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):

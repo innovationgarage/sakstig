@@ -1,5 +1,6 @@
 from . import ast_base_types
 from . import typeinfo
+from . import queryset
 import re
 import datetime
 
@@ -21,7 +22,7 @@ class MathOp(ast_base_types.Op):
             for a in self.args[0](global_qs, local_qs):
                 for b in self.args[1](global_qs, local_qs):
                     yield self._op(a, b)
-        return ast_base_types.QuerySet(result())
+        return queryset.QuerySet(result())
     def _op(self, a, b):
         if a is None:
             if typeinfo.is_dict(b):
@@ -144,7 +145,7 @@ class nop_expr(ast_base_types.Op):
         def result():
             for a in self.args[0](global_qs, local_qs):
                 yield not a
-        return ast_base_types.QuerySet(result())
+        return queryset.QuerySet(result())
 
 class op_union_union(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
@@ -153,12 +154,12 @@ class op_union_union(ast_base_types.Op):
                 yield a
             for b in self.args[1](global_qs, local_qs):
                 yield b
-        return ast_base_types.QuerySet(result())
+        return queryset.QuerySet(result())
     
 class filter(ast_base_types.Op):
     def filter_qs(self, filter, global_qs, local_qs):
         for item in local_qs:
-            for filter_res in filter(global_qs, ast_base_types.QuerySet([item])):
+            for filter_res in filter(global_qs, queryset.QuerySet([item])):
                 if typeinfo.is_int(filter_res) or typeinfo.is_str(filter_res):
                     try:
                         yield item[filter_res]
@@ -170,5 +171,5 @@ class filter(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
         local_qs = self.args[0](global_qs, local_qs)
         for filter in self.args[1:]:
-            local_qs = ast_base_types.QuerySet(self.filter_qs(filter, global_qs, local_qs))
+            local_qs = queryset.QuerySet(self.filter_qs(filter, global_qs, local_qs))
         return local_qs

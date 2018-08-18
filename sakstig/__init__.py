@@ -1,12 +1,13 @@
 from . import grammar
 from . import ast
 from . import ast_base_types
+from . import queryset
 from .typeinfo import *
 
 Function = ast_base_types.Function
 
 compile = ast.compile
-QuerySet = ast_base_types.QuerySet
+QuerySet = queryset.QuerySet
 
 # For compatibility with objectpath
 class Tree(object):

@@ -1,6 +1,7 @@
 # Array functions
 
 from .. import ast_base_types
+from .. import queryset
 from .. import typeinfo
 
 class sort(ast_base_types.Function):
@@ -8,11 +9,11 @@ class sort(ast_base_types.Function):
         kw = {}
         if len(args) > 1:
             kw["key"] = lambda a: a[args[1][0]]
-        return ast_base_types.QuerySet([list(sorted(args[0].flatten(no_dict=True), **kw))])
+        return queryset.QuerySet([list(sorted(args[0].flatten(no_dict=True), **kw))])
 
 class reverse(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
-        return ast_base_types.QuerySet([list(reversed(args[0].flatten()))])
+        return queryset.QuerySet([list(reversed(args[0].flatten()))])
 
 def compat_len(item):
     # For compatibility with ObjectPath-ng
@@ -43,7 +44,7 @@ class join(ast_base_types.Function):
         for item in items[1:]:
             res += type(res)(joiner)
             res += type(res)(item)
-        return ast_base_types.QuerySet([res])
+        return queryset.QuerySet([res])
 
 class keys(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
@@ -54,6 +55,6 @@ class keys(ast_base_types.Function):
                         yield key
                 else:
                     raise ValueError(item)
-        return ast_base_types.QuerySet(result())
+        return queryset.QuerySet(result())
 
         

@@ -1,6 +1,7 @@
 # Casting functions
 
 from .. import ast_base_types
+from .. import queryset
 from .. import typeinfo
 import datetime
 
@@ -48,7 +49,7 @@ def comp_list(item):
 class _array(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         if not args:
-            return ast_base_types.QuerySet([[]])
+            return queryset.QuerySet([[]])
         return args[0].map(comp_list)
 
 def comp_datetime(item):
@@ -86,7 +87,7 @@ def comp_time(item):
 class _dateTime(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         if not args:
-            return ast_base_types.QuerySet([datetime.datetime.now()])
+            return queryset.QuerySet([datetime.datetime.now()])
         elif len(args) == 2:
             return args[1].map(lambda t: datetime.datetime.combine(comp_date(args[0][0]), comp_time(t)))
         return args[0].map(lambda l: comp_datetime(l))
@@ -94,11 +95,11 @@ class _dateTime(ast_base_types.Function):
 class _date(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         if not args:
-            return ast_base_types.QuerySet([datetime.date.today()])
+            return queryset.QuerySet([datetime.date.today()])
         return args[0].map(lambda l: comp_date(l))
 
 class _time(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         if not args:
-            return ast_base_types.QuerySet([datetime.datetime.now().time()])
+            return queryset.QuerySet([datetime.datetime.now().time()])
         return args[0].map(lambda l: comp_time(l))

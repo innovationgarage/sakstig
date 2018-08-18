@@ -1,7 +1,7 @@
 import functools
 import datetime
 import re
-from .queryset import QuerySet
+from . import queryset
 from . import typeinfo
 
 class Expr(object):
@@ -12,7 +12,7 @@ class Const(Expr):
     def __init__(self, value):
         self.value = value
     def __call__(self, global_qs, local_qs):
-        return QuerySet([self.value])
+        return queryset.QuerySet([self.value])
     def __repr__(self):
         return repr(self.value)
 
@@ -65,7 +65,7 @@ class Name(Expr):
         elif self.name == "*":
             return local_qs.flatten(children_only=True)
         elif local_qs is None:
-            return QuerySet([self.name])
+            return queryset.QuerySet([self.name])
         else:
             return local_qs.map(lambda item: item[self.name])
     def __repr__(self):
@@ -75,8 +75,8 @@ class Array(Expr):
     def __init__(self, items):
         self.items = items
     def __call__(self, global_qs, local_qs):
-        return QuerySet([
-            list(QuerySet(item
+        return queryset.QuerySet([
+            list(queryset.QuerySet(item
                           for item in (item(global_qs, local_qs)
                                        for item in self.items)
                           if item).flatten())])
@@ -87,7 +87,7 @@ class Dict(Expr):
     def __init__(self, items):
         self.items = items
     def __call__(self, global_qs, local_qs):
-        return QuerySet([{key[0]: value[0]
+        return queryset.QuerySet([{key[0]: value[0]
                           for key, value in ((key(global_qs, local_qs), value(global_qs, local_qs))
                                              for key, value in self.items)
                           if key and value}])
