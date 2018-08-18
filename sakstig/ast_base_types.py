@@ -53,20 +53,6 @@ class Function(Op):
     
     def __repr__(self):
         return "%s(%s)" % (self.name, ", ".join(repr(arg) for arg in self.args))
-
-def children(item):
-    if typeinfo.is_dict(item):
-        return item.values()
-    elif typeinfo.is_list(item):
-        return iter(item)
-    else:
-        return []
-
-def descendants(item):
-    yield item
-    for child in children(item):
-        for descendant in descendants(child):
-            yield descendant
     
 class Name(Expr):
     def __init__(self, name):

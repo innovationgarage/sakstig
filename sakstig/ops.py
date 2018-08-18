@@ -10,7 +10,7 @@ class op_path_one(ast_base_types.Op):
 class op_path_multi(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
         assert isinstance(self.args[1], ast_base_types.Name)
-        return self.args[1](global_qs, ast_base_types.QuerySet(ast_base_types.descendants(self.args[0](global_qs, local_qs))))
+        return self.args[1](global_qs, self.args[0](global_qs, local_qs).descendants())
 
 class MathOp(ast_base_types.Op):
     abstract = True

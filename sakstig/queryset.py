@@ -41,5 +41,20 @@ class QuerySet(list):
                     yield item
         return QuerySet(flatten())
 
+    def descendants(self):
+        def children(item):
+            if typeinfo.is_dict(item):
+                return item.values()
+            elif typeinfo.is_list(item):
+                return iter(item)
+            else:
+                return []
+        def descendants(item):
+            yield item
+            for child in children(item):
+                for descendant in descendants(child):
+                    yield descendant
+        return QuerySet(descendants(self))
+    
     def __add__(self, other):
         return type(self)(list.__add__(self, other))
