@@ -1,6 +1,7 @@
 # Casting functions
 
 from .. import ast_base_types
+from .. import typeinfo
 import datetime
 
 def comp_str(item):
@@ -26,7 +27,7 @@ class _float(ast_base_types.Function):
         return args[0].map(float)
 
 def comp_list(item):
-    if ast_base_types.is_timedelta(item):
+    if typeinfo.is_timedelta(item):
         tms = int(item.total_seconds() * 1000000)
         ms = tms % 1000000
         tms = tms // 1000000
@@ -35,11 +36,11 @@ def comp_list(item):
         m = tms % 60
         h = tms // 60
         return [h, m, s, ms]
-    elif ast_base_types.is_datetime(item):
+    elif typeinfo.is_datetime(item):
         return [item.year, item.month, item.day, item.hour, item.minute, item.second, item.microsecond]
-    elif ast_base_types.is_date(item):
+    elif typeinfo.is_date(item):
         return [item.year, item.month, item.day]
-    elif ast_base_types.is_time(item):
+    elif typeinfo.is_time(item):
         return [item.hour, item.minute, item.second, item.microsecond]
     else:
         return list(item)
@@ -51,35 +52,35 @@ class _array(ast_base_types.Function):
         return args[0].map(comp_list)
 
 def comp_datetime(item):
-    if ast_base_types.is_datetime(item):
+    if typeinfo.is_datetime(item):
         return item
-    elif ast_base_types.is_list(item):
+    elif typeinfo.is_list(item):
         item = list(item)
         item += ([0] * 7)[len(item):] + [datetime.timezone.utc]
         return datetime.datetime(*item)
-    elif ast_base_types.is_str(item):
+    elif typeinfo.is_str(item):
         return datetime.datetime.strptime(item + " +0000", "%Y-%m-%d %H:%M:%S %z")
     
 def comp_date(item):
-    if ast_base_types.is_date(item):
+    if typeinfo.is_date(item):
         return item
-    elif ast_base_types.is_datetime(item):
+    elif typeinfo.is_datetime(item):
         return item.date()
-    elif ast_base_types.is_list(item):
+    elif typeinfo.is_list(item):
         return datetime.date(*item)
-    elif ast_base_types.is_str(item):
+    elif typeinfo.is_str(item):
         return datetime.datetime.strptime(item, "%Y-%m-%d").date()
 
 def comp_time(item):
-    if ast_base_types.is_time(item):
+    if typeinfo.is_time(item):
         return item
-    elif ast_base_types.is_datetime(item):
+    elif typeinfo.is_datetime(item):
         return item.time()
-    elif ast_base_types.is_list(item):
+    elif typeinfo.is_list(item):
         item = list(item)
         item += ([0] * 4)[len(item):] + [datetime.timezone.utc]
         return datetime.time(*item)
-    elif ast_base_types.is_str(item):
+    elif typeinfo.is_str(item):
         return datetime.datetime.strptime(item + " +0000", "%H:%M:%S %z").time()
     
 class _dateTime(ast_base_types.Function):

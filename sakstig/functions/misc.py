@@ -1,6 +1,7 @@
 # Misc functions
 
 from .. import ast_base_types
+from .. import typeinfo
 import uuid
 try:
     import jsonschema
@@ -10,11 +11,11 @@ except:
 class _type(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         def t(o):
-            if ast_base_types.is_str(o):
+            if typeinfo.is_str(o):
                 return 'str'
-            elif ast_base_types.is_dict(o):
+            elif typeinfo.is_dict(o):
                 return 'object'
-            elif ast_base_types.is_list(o):
+            elif typeinfo.is_list(o):
                 return 'array'
             else:
                 return type(o).__name__.lower()

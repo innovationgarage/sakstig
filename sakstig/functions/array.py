@@ -1,6 +1,7 @@
 # Array functions
 
 from .. import ast_base_types
+from .. import typeinfo
 
 class sort(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
@@ -48,7 +49,7 @@ class keys(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         def result():
             for item in args[0]:
-                if ast_base_types.is_dict(item):
+                if typeinfo.is_dict(item):
                     for key in item.keys():
                         yield key
                 else:

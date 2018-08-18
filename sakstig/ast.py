@@ -1,5 +1,7 @@
 from . import ast_base_types
+from . import ops
 from . import functions
+from . import grammar
 import re
 
 class AST(object):
@@ -116,6 +118,15 @@ class AST(object):
             return path
         return ast_base_types.Op("filter", path, *filters)
 
+def compile(query):
+    tree = grammar.grammar.parse(query)
+    if not tree.is_valid:
+        raise SyntaxError("Malformed query: %s<ERROR>%s\n%s" % (
+            query[:tree.pos],
+            query[tree.pos:],
+            grammar.format_tree(tree.tree)))
+    return AST(tree.tree)
+    
 def main():
     from . import grammar
     import sys

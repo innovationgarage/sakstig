@@ -1,9 +1,10 @@
 # Arithmetic functions
 
 from .. import ast_base_types
+from .. import ops
 import functools
 
-_add_op = ast_base_types.op_add_add(None)._op
+_add_op = ops.op_add_add(None)._op
 def add_op(a, b):
     try:
         return _add_op(a, b)

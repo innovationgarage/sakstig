@@ -1,16 +1,11 @@
 from . import grammar
 from . import ast
 from . import ast_base_types
+from .typeinfo import *
 
 Function = ast_base_types.Function
 
-is_str = ast_base_types.is_str
-is_dict = ast_base_types.is_dict
-is_list = ast_base_types.is_list
-is_int = ast_base_types.is_int
-is_float = ast_base_types.is_float
-
-compile = ast_base_types.compile
+compile = ast.compile
 QuerySet = ast_base_types.QuerySet
 
 # For compatibility with objectpath
