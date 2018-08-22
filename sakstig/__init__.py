@@ -12,7 +12,9 @@ QuerySet = queryset.QuerySet
 # For compatibility with objectpath
 class Tree(object):
     def __init__(self, obj):
-        self.queryset = QuerySet([obj])
+        if not is_list(obj) and not is_set(obj):
+            obj = [obj]
+        self.queryset = QuerySet(obj)
     def execute(self, query):
         r=self.queryset.execute(query)
         if len(r) == 1:

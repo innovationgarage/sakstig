@@ -24,6 +24,11 @@ def max_op(a, b):
     except:
         return a
 
+class _round(ast_base_types.Function):
+    def call(self, global_qs, local_qs, args):
+        arg = [x[0] for x in args[1:]]
+        return args[0].map(lambda x: round(x, *arg))
+    
 class _sum(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         return queryset.QuerySet([
