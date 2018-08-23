@@ -7,6 +7,11 @@ any python object that supports the dict or list interfaces (the default impleme
 * [SakStig examples](SakStig_examples.md)
 * [SakStig semantics](SakStig_semantics.md)
 
+## ObjectPath compatibility
+
+You can turn off some of the [ObjectPath compatibility
+features](CompatibilityOptions.md) to get more homogenous semantics.
+
 ## SakForm templating
 
 A SakForm template is a valid JSON document. It is applied to a data
