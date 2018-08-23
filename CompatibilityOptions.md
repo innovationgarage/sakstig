@@ -16,6 +16,16 @@ yield 1.
 
 You can turn off this behavior with
 
-    autoflatten_lists=True
+    autoflatten_lists=False
 
 which will make the . operator only look directly inside objects.
+
+sum() and avg() ignores items that are not of a uniform type (same
+type as the first item). This is not analogous to how the + operator
+works, which is unintuitive.
+
+You can make these work just like the + operator with
+
+    aggregate_casts=True
+
+which will make e.g. sum([1, "2", 3]) == 6, not 4.
