@@ -3,6 +3,7 @@ from . import typeinfo
 from . import queryset
 import re
 import datetime
+import math
 
 class op_path_one(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
@@ -106,7 +107,10 @@ class op_comp_is(MathOp):
             b = type(a)(b)
         except:
             return False
-        return a == b
+        if typeinfo.is_float(a):
+            return math.isclose(a, b)
+        else:
+            return a == b
             
 class op_comp_is_not(MathOp):
     def op(self, a, b):
@@ -116,7 +120,10 @@ class op_comp_is_not(MathOp):
             b = type(a)(b)
         except:
             return True
-        return not a == b
+        if typeinfo.is_float(a):
+            return not math.isclose(a, b)
+        else:
+            return not a == b
 
 class op_comp_lt(MathOp):
     def op(self, a, b):
