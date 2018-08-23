@@ -202,7 +202,9 @@ class op_union_union(ast_base_types.Op):
 class filter(ast_base_types.Op):
     def filter_qs(self, filter, global_qs, local_qs):
         for idx, item in enumerate(local_qs):
-            for filter_res in filter(global_qs, queryset.QuerySet([item])):
+            filter_qs = queryset.QuerySet([item])
+            filter_qs.is_filter_qs = True
+            for filter_res in filter(global_qs, filter_qs):
                 if (self.context.args.get("index_filter_queryset", True)
                     and typeinfo.is_int(filter_res)
                     and len(local_qs) > 0
