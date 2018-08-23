@@ -85,14 +85,18 @@ class op_comp_in(MathOp):
     def op(self, a, b):
         if self.context.args.get("in_queryset", True) and op_comp_is(self.context, None).op(a, b):
             return True
+        if typeinfo.is_list(a) and set(a).intersection(set(b)):
+            return True
         try:
-            return a in b or op_comp_is().op(a, b)
+            return a in b
         except:
             return False
 
 class op_comp_not_in(MathOp):
     def op(self, a, b):
         if self.context.args.get("in_queryset", True) and op_comp_is(self.context, None).op(a, b):
+            return False
+        if typeinfo.is_list(a) and set(a).intersection(set(b)):
             return False
         try:
             return a not in b
