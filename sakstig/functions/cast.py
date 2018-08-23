@@ -28,15 +28,10 @@ class _float(ast_base_types.Function):
         return args[0].map(float)
 
 def comp_list(item):
-    if typeinfo.is_timedelta(item):
-        tms = int(item.total_seconds() * 1000000)
-        ms = tms % 1000000
-        tms = tms // 1000000
-        s = tms % 60
-        tms = tms // 60
-        m = tms % 60
-        h = tms // 60
-        return [h, m, s, ms]
+    if hasattr(item, "as_list"):
+        return item.as_list()
+    elif typeinfo.is_timedelta(item):
+        return item.total_seconds()
     elif typeinfo.is_datetime(item):
         return [item.year, item.month, item.day, item.hour, item.minute, item.second, item.microsecond]
     elif typeinfo.is_date(item):

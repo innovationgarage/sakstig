@@ -1,3 +1,5 @@
+import datetime
+
 def is_str(o):
     return hasattr(o, 'lower')
 def is_regexp(o):
@@ -20,3 +22,14 @@ def is_date(o):
     return hasattr(o, 'year') and not hasattr(o, 'hour')
 def is_time(o):
     return not hasattr(o, 'year') and hasattr(o, 'hour')    
+
+class TimeOnlyDelta(datetime.timedelta):
+    def as_list(self):
+        tms = int(self.total_seconds() * 1000000)
+        ms = tms % 1000000
+        tms = tms // 1000000
+        s = tms % 60
+        tms = tms // 60
+        m = tms % 60
+        h = (tms // 60) % 24
+        return [h, m, s, ms]

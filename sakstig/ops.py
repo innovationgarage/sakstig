@@ -75,10 +75,11 @@ class op_add_add(MathOp):
 
 class op_add_sub(MathOp):
     def op(self, a, b):
-        if typeinfo.is_time(a):
+        if typeinfo.is_time(a) and typeinfo.is_time(b):
             a = datetime.datetime.combine(datetime.datetime(1970,1,1), a)
-        if typeinfo.is_time(b):
             b = datetime.datetime.combine(datetime.datetime(1970,1,1), b)
+            res = a - b
+            return typeinfo.TimeOnlyDelta(res.days, res.seconds, res.microseconds)
         return a - b
 
 class op_comp_in(MathOp):
