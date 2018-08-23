@@ -4,9 +4,22 @@ from . import functions
 from . import grammar
 import re
 
+no_compatibility = dict(
+    in_queryset=False,
+    autoflatten_lists=False,
+    aggregate_casts=True,
+    nop_star=False,
+    add_as_join=False
+)
+
 class AST(object):
     def __new__(cls, node, **args):
         self = object.__new__(cls)
+        if not args.get("compatibility", True):
+            res = {}
+            res.update(no_compatibility)
+            res.update(args)
+            args = res
         self.args = args
         return self._build_ast(node)
     def _build_ast(self, node):

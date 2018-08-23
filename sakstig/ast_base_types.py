@@ -66,7 +66,7 @@ class Name(Expr):
         elif self.name == "@":
             return local_qs        
         elif self.name == "*":
-            if not getattr(local_qs, 'is_path_multi', False):
+            if not self.context.args.get('nop_star', True) and not getattr(local_qs, 'is_path_multi', False):
                 local_qs = local_qs.flatten(children_only=True)
             return local_qs
         elif local_qs is None:

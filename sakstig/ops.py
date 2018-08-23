@@ -61,6 +61,24 @@ class op_mul_mod(MathOp):
         return a % b
     
 class op_add_add(MathOp):
+    def __call__(self, global_qs, local_qs):
+        left = self.args[0](global_qs, local_qs)
+        right = self.args[1](global_qs, local_qs)
+        if self.context.args.get("add_as_join", True) and (len(left) != 1 or len(right) != 1):
+            # Same as op_union_union
+            def result():
+                for a in left:
+                    yield a
+                for b in right:
+                    yield b
+            return queryset.QuerySet(result())
+        else:
+            # Same as base class
+            def result():
+                for a in left:
+                    for b in right:
+                        yield self._op(a, b)
+            return queryset.QuerySet(result())    
     def op(self, a, b):
         if not (isinstance(a, int) and isinstance(b, float)):
             b = type(a)(b)
