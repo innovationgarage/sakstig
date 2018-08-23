@@ -9,7 +9,9 @@ no_compatibility = dict(
     autoflatten_lists=False,
     aggregate_casts=True,
     nop_star=False,
-    add_as_join=False
+    add_as_join=False,
+    index_filter_queryset=False,
+    descendant_leaves=True
 )
 
 class AST(object):

@@ -50,3 +50,13 @@ distribute across all values of both querysets (perform a cross join),
 set
 
     add_as_join=False
+
+In objectpath obj[5] can either extract the fifth element of an array,
+or the fifth result of a query. To make it take the fith element of
+all array results of a query instead, set
+
+    index_filter_queryset=False
+
+To include non-dictionaries in results from the ".." operator, set
+
+    descendant_leaves=True

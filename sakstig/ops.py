@@ -12,7 +12,8 @@ class op_path_one(ast_base_types.Op):
 class op_path_multi(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
         assert isinstance(self.args[1], ast_base_types.Name)
-        local_qs = self.args[0](global_qs, local_qs).descendants()
+        local_qs = self.args[0](global_qs, local_qs).descendants(
+            include_leaves=self.context.args.get("descendant_leaves", False))
         local_qs.is_path_multi = True
         return self.args[1](global_qs, local_qs)
 
@@ -200,9 +201,15 @@ class op_union_union(ast_base_types.Op):
     
 class filter(ast_base_types.Op):
     def filter_qs(self, filter, global_qs, local_qs):
-        for item in local_qs:
+        for idx, item in enumerate(local_qs):
             for filter_res in filter(global_qs, queryset.QuerySet([item])):
-                if typeinfo.is_int(filter_res) or typeinfo.is_str(filter_res):
+                if (self.context.args.get("index_filter_queryset", True)
+                    and typeinfo.is_int(filter_res)
+                    and len(local_qs) > 0
+                    and not typeinfo.is_list(local_qs[0])):
+                    if idx == filter_res:
+                        yield item
+                elif typeinfo.is_int(filter_res) or typeinfo.is_str(filter_res):
                     try:
                         yield item[filter_res]
                     except:

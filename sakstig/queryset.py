@@ -41,7 +41,7 @@ class QuerySet(list):
                     yield item
         return QuerySet(flatten())
 
-    def descendants(self, include_lists=False):
+    def descendants(self, include_lists=False, include_leaves=True):
         def children(item):
             if typeinfo.is_dict(item):
                 return item.values()
@@ -50,7 +50,8 @@ class QuerySet(list):
             else:
                 return []
         def descendants(item):
-            if include_lists or not typeinfo.is_list(item):
+            if ((include_lists or not typeinfo.is_list(item))
+                and (include_leaves or typeinfo.is_dict(item))):
                 yield item
             for child in children(item):
                 for descendant in descendants(child):
