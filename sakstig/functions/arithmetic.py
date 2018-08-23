@@ -5,7 +5,7 @@ from .. import queryset
 from .. import ops
 import functools
 
-_add_op = ops.op_add_add(None)._op
+_add_op = ops.op_add_add(None, None)._op
 def add_op(a, b):
     try:
         return _add_op(a, b)

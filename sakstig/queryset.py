@@ -4,13 +4,13 @@ class QuerySet(list):
     def __repr__(self):
         return "%s\n" % ("\n".join(repr(item) for item in self))
 
-    def execute(self, query, global_qs = None):
+    def execute(self, query, global_qs = None, **args):
         from . import ast
         from . import ast_base_types
         if not isinstance(query, ast_base_types.Expr):
             if not isinstance(query, str):
                 return QuerySet([query])
-            query = ast.compile(query)
+            query = ast.compile(query, **args)
         if global_qs is None:
             global_qs = self
         return query(global_qs, None)
@@ -41,7 +41,7 @@ class QuerySet(list):
                     yield item
         return QuerySet(flatten())
 
-    def descendants(self):
+    def descendants(self, include_lists=False):
         def children(item):
             if typeinfo.is_dict(item):
                 return item.values()
@@ -50,7 +50,8 @@ class QuerySet(list):
             else:
                 return []
         def descendants(item):
-            yield item
+            if include_lists or not typeinfo.is_list(item):
+                yield item
             for child in children(item):
                 for descendant in descendants(child):
                     yield descendant
@@ -58,3 +59,18 @@ class QuerySet(list):
     
     def __add__(self, other):
         return type(self)(list.__add__(self, other))
+
+
+# For compatibility with objectpath
+class Tree(object):
+    def __init__(self, obj):
+        if not typeinfo.is_list(obj) and not typeinfo.is_set(obj):
+            obj = [obj]
+        self.queryset = QuerySet(obj)
+    def execute(self, query, **args):
+        r=self.queryset.execute(query, **args)
+        if len(r) == 1:
+            return r[0]
+        elif len(r) == 0:
+            return None
+        return r

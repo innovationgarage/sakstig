@@ -5,8 +5,9 @@ from . import grammar
 import re
 
 class AST(object):
-    def __new__(cls, node):
+    def __new__(cls, node, **args):
         self = object.__new__(cls)
+        self.args = args
         return self._build_ast(node)
     def _build_ast(self, node):
         name = getattr(node.element, 'name', None)
@@ -53,40 +54,42 @@ class AST(object):
     def t_number(self, node):
         s = node.string.replace("+", "").replace("--", "")
         if 'e' in s or '.' in s:
-            return ast_base_types.Const(float(s))
+            return ast_base_types.Const(self, float(s))
         else:
-            return ast_base_types.Const(int(s))
+            return ast_base_types.Const(self, int(s))
     def t_string(self, node):
-        return ast_base_types.Const(node.string[1:-1])
+        return ast_base_types.Const(self, node.string[1:-1])
     def t_regexp(self, node):
-        return ast_base_types.Const(re.compile(node.string[1:-1]))
+        return ast_base_types.Const(self, re.compile(node.string[1:-1]))
     def simple_name(self, node):
         name = node.string
         name_lower = name.lower()
         if name_lower in ('null', 'none', 'nil', 'n'):
-            return ast_base_types.Const(None)
+            return ast_base_types.Const(self, None)
         elif name_lower in ('true', 't'):
-            return ast_base_types.Const(True)
+            return ast_base_types.Const(self, True)
         elif name_lower in ('false', 'f'):
-            return ast_base_types.Const(False)
+            return ast_base_types.Const(self, False)
         else:
-            return ast_base_types.Name(name)
+            return ast_base_types.Name(self, name)
     def star(self, node):
-        return ast_base_types.Name("*")
+        return ast_base_types.Name(self, "*")
     def t_array_list(self, node, *items):
         return ast_base_types.Array(
-            item
-            for item in items
-            if not isinstance(item, self.sep))
+            self,
+            (item
+             for item in items
+             if not isinstance(item, self.sep)))
     def t_array(self, node, l, items, r):
         return items
     def t_dict_item(self, node, left, sep, right):
         return (left, right)
     def t_dict_list(self, node, *items):
         return ast_base_types.Dict(
-            item
-            for item in items
-            if not isinstance(item, self.sep))
+            self,
+            (item
+             for item in items
+             if not isinstance(item, self.sep)))
     def t_dict(self, node, l, items, r):
         return items
     def p_expr(self, node, l, expr, r):
@@ -100,11 +103,11 @@ class AST(object):
     def a_expr(self, node, l, args, r):
         return args
     def c_expr(self, node, name, args):
-        return ast_base_types.Function(name.name, *args)
+        return ast_base_types.Function(self, name.name, *args)
     def nop_expr(self, node, nop, expr):
-        return ast_base_types.Op("nop_expr", expr)
+        return ast_base_types.Op(self, "nop_expr", expr)
     def op(self, node, left, right):
-        return ast_base_types.Op(node.children[0].element.name, left, right)
+        return ast_base_types.Op(self, node.children[0].element.name, left, right)
     op_path = op
     op_mul = op
     op_add = op
@@ -116,16 +119,16 @@ class AST(object):
     def fpath(self, node, path, filters):
         if not filters:
             return path
-        return ast_base_types.Op("filter", path, *filters)
+        return ast_base_types.Op(self, "filter", path, *filters)
 
-def compile(query):
+def compile(query, **args):
     tree = grammar.grammar.parse(query)
     if not tree.is_valid:
         raise SyntaxError("Malformed query: %s<ERROR>%s\n%s" % (
             query[:tree.pos],
             query[tree.pos:],
             grammar.format_tree(tree.tree)))
-    return AST(tree.tree)
+    return AST(tree.tree, **args)
     
 def main():
     from . import grammar

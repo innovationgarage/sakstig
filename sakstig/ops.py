@@ -11,7 +11,9 @@ class op_path_one(ast_base_types.Op):
 class op_path_multi(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
         assert isinstance(self.args[1], ast_base_types.Name)
-        return self.args[1](global_qs, self.args[0](global_qs, local_qs).descendants())
+        local_qs = self.args[0](global_qs, local_qs).descendants()
+        local_qs.is_path_multi = True
+        return self.args[1](global_qs, local_qs)
 
 class MathOp(ast_base_types.Op):
     abstract = True
@@ -80,12 +82,22 @@ class op_add_sub(MathOp):
 
 class op_comp_in(MathOp):
     def op(self, a, b):
-        return a in b
+        if self.context.args.get("in_queryset", True) and op_comp_is(self.context, None).op(a, b):
+            return True
+        try:
+            return a in b or op_comp_is().op(a, b)
+        except:
+            return False
 
 class op_comp_not_in(MathOp):
     def op(self, a, b):
-        return a not in b
-
+        if self.context.args.get("in_queryset", True) and op_comp_is(self.context, None).op(a, b):
+            return False
+        try:
+            return a not in b
+        except:
+            return True
+        
 class op_comp_is(MathOp):
     def op(self, a, b):
         if a == b:
