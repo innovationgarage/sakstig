@@ -4,12 +4,20 @@ from .. import ast_base_types
 from .. import queryset
 from .. import typeinfo
 
-class sort(ast_base_types.Function):
-    def call(self, global_qs, local_qs, args):
+class sort(ast_base_types.Op):
+    def __call__(self, global_qs, local_qs):        
+        array = self.args[0](global_qs, local_qs).flatten(no_dict=True)
         kw = {}
-        if len(args) > 1:
-            kw["key"] = lambda a: a[args[1][0]]
-        return queryset.QuerySet([list(sorted(args[0].flatten(no_dict=True), **kw))])
+        if len(self.args) > 1:
+            if isinstance(self.args[1], ast_base_types.Const):
+                key = self.args[1](global_qs, local_qs)
+                kw["key"] = lambda a: a[key[0]]
+            else:
+                kw["key"] = lambda a: self.args[1](global_qs, queryset.QuerySet([a]))[0]
+        return queryset.QuerySet([list(sorted(array, **kw))])
+    
+    def __repr__(self):
+        return "%s(%s)" % (self.name, ", ".join(repr(arg) for arg in self.args))
 
 class reverse(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
