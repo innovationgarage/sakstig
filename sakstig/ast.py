@@ -92,9 +92,9 @@ class AST(object):
     def t_array_list(self, node, *items):
         return ast_base_types.Array(
             self,
-            (item
+            [item
              for item in items
-             if not isinstance(item, self.sep)))
+             if not isinstance(item, self.sep)])
     def t_array(self, node, l, items, r):
         return items
     def t_dict_item(self, node, left, sep, right):
@@ -102,9 +102,9 @@ class AST(object):
     def t_dict_list(self, node, *items):
         return ast_base_types.Dict(
             self,
-            (item
+            [item
              for item in items
-             if not isinstance(item, self.sep)))
+             if not isinstance(item, self.sep)])
     def t_dict(self, node, l, items, r):
         return items
     def p_expr(self, node, l, expr, r):
