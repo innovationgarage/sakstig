@@ -64,7 +64,7 @@ class Name(Expr):
         if self.name == "$":
             return global_qs
         elif self.name == "@":
-            return local_qs        
+            return queryset.QuerySet(local_qs) # Reset any is_filter_qs flags...
         elif self.name == "*":
             if not self.context.args.get('nop_star', True) and not getattr(local_qs, 'is_path_multi', False):
                 local_qs = local_qs.flatten(children_only=True)
