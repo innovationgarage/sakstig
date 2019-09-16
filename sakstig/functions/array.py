@@ -3,6 +3,7 @@
 from .. import ast_base_types
 from .. import queryset
 from .. import typeinfo
+import functools
 
 class sort(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):        
@@ -65,4 +66,36 @@ class keys(ast_base_types.Function):
                     raise ValueError(item)
         return queryset.QuerySet(result())
 
-        
+class _map(ast_base_types.Op):
+    __name__ = "map"
+    def __call__(self, global_qs, local_qs):        
+        return queryset.QuerySet([
+            list(queryset.QuerySet(item
+                          for item in (self.args[1](global_qs, queryset.QuerySet([item]))
+                                       for item in self.args[0](global_qs, local_qs).flatten(no_dict=True))
+                          if item).flatten())])
+    
+    def __repr__(self):
+        return "%s(%s)" % (self.name, ", ".join(repr(arg) for arg in self.args))
+
+class _reduce(ast_base_types.Op):
+    __name__ = "reduce"
+    def __call__(self, global_qs, local_qs):
+        array = self.args[0](global_qs, local_qs).flatten(no_dict=True)
+
+        initial = []
+        if len(self.args) > 2:
+            initial = [self.args[2](global_qs, local_qs).flatten(no_dict=True)]
+
+        def reducer(a, b):
+            if isinstance(a, queryset.QuerySet):
+                a = list(a)
+            else:
+                a = [a]
+            arg = queryset.QuerySet([a + [b]])
+            return self.args[1](global_qs, arg)
+            
+        return functools.reduce(reducer, array, *initial)
+    
+    def __repr__(self):
+        return "%s(%s)" % (self.name, ", ".join(repr(arg) for arg in self.args))

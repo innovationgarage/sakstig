@@ -37,3 +37,29 @@ QuerySets. The `,` operator takes two expressions and forms the union
 of their reults. Note that in a function argument, array or dictionary
 context, you must surround this type of expression by parenthesis as
 it would otherwize be ambigous.
+
+# Additional functions
+
+SakStig supports some additional functions as well as some additional
+usages of existing functions beyond what ObjectPath does:
+
+* String functions can be applied to arrays and vice versa where it
+  makes sense.
+
+* sort(array, key) can use a path expression as key, e.g. sort(array,
+  @.given_name + @.surname)
+
+* map(array, path) evaluates the path for each array element,
+  producing a new array. Example:
+
+    >>> sakstig.QuerySet([[1, 2, 3]]).execute("map($, @+1)")
+    [2, 3, 4]
+
+* reduce(array, path, [initial]) evaluates path for on a list
+  containing the first two elements of array, then on a list
+  containing the result of that and the third element, etc
+  recursively. If initial is supplied, its value is prepended to the
+  array before the reduction begins. Example:
+
+    >>> sakstig.QuerySet([[1, 2, 3, 4]]).execute("reduce($, @[0] * @[1])")
+    24
