@@ -82,7 +82,10 @@ class op_add_add(MathOp):
             return queryset.QuerySet(result())    
     def op(self, a, b):
         if not (isinstance(a, int) and isinstance(b, float)):
-            b = type(a)(b)
+            try:
+                b = type(a)(b)
+            except:
+                pass
         if typeinfo.is_dict(a) and typeinfo.is_dict(b):
             res = {}
             res.update(a)
