@@ -46,8 +46,17 @@ usages of existing functions beyond what ObjectPath does:
 * String functions can be applied to arrays and vice versa where it
   makes sense.
 
-* sort(array, key) can use a path expression as key, e.g. sort(array,
-  @.given_name + @.surname)
+```python
+>>> sakstig.QuerySet([["a", "b", "c", "d"]]).execute("slice($, [1,None])")
+['b', 'c', 'd']
+```
+
+* sort(array, key) can use a path expression as key
+
+```python
+>>> sakstig.QuerySet([[{"a":1, "b":2}, {"a":1, "b":1}, {"a":2, "b":2}]]).execute("sort($, @.a + @.b)")
+[{'a': 1, 'b': 1}, {'a': 1, 'b': 2}, {'a': 2, 'b': 2}]
+```
 
 * map(array, path) evaluates the path for each array element,
   producing a new array. Example:
