@@ -52,8 +52,10 @@ usages of existing functions beyond what ObjectPath does:
 * map(array, path) evaluates the path for each array element,
   producing a new array. Example:
 
-    >>> sakstig.QuerySet([[1, 2, 3]]).execute("map($, @+1)")
-    [2, 3, 4]
+```python
+>>> sakstig.QuerySet([[1, 2, 3]]).execute("map($, @+1)")
+[2, 3, 4]
+```
 
 * reduce(array, path, [initial]) evaluates path for on a list
   containing the first two elements of array, then on a list
@@ -61,5 +63,7 @@ usages of existing functions beyond what ObjectPath does:
   recursively. If initial is supplied, its value is prepended to the
   array before the reduction begins. Example:
 
-    >>> sakstig.QuerySet([[1, 2, 3, 4]]).execute("reduce($, @[0] * @[1])")
-    24
+```python
+>>> sakstig.QuerySet([[1, 2, 3, 4]]).execute("reduce($, @[0] * @[1])")
+24
+```
