@@ -1,5 +1,11 @@
 # An objectpath query and templating engine
 
+# Installation
+
+Note: SakStig only supports Python 3.
+
+    pip install sakstig
+    
 # SakStig path expressions
 SakStig is an [objectpath](http://objectpath.org) implementation that uses proper querysets and supports querying
 any python object that supports the dict or list interfaces (the default implementation only supports the real dict and list types).
