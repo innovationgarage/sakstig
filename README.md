@@ -32,7 +32,7 @@ using SakStig expressions.
 # Tests
 
 This repository uses the tests of ObjectPath to verify compatibility.
-To run the tests you need to clone ObjectPath:
+To run the tests you need to clone ObjectPath into a subdirectory of this repository:
 
     git clone git@github.com:adriank/ObjectPath.git
     pip install nose
