@@ -13,7 +13,8 @@ no_compatibility = dict(
     index_filter_queryset=False,
     descendant_leaves=True,
     cmp_empty_same=True,
-    empty_queryset_is_none=False
+    empty_queryset_is_none=False,
+    object_slicing=False
 )
 
 class AST(object):
@@ -110,7 +111,7 @@ class AST(object):
     def t_dict(self, node, l, items, r):
         return items
     def p_expr(self, node, l, expr, r):
-        return expr
+        return ast_base_types.ParenExpr(self, expr)
     def f_expr(self, node, l, expr, r):
         return expr
     def a_expr_list(self, node, *items):

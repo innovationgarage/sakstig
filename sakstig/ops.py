@@ -8,6 +8,11 @@ import math
 class op_path_one(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
         parent = self.args[0](global_qs, local_qs)
+        if (    self.context.args.get("_slicing", True)
+            and isinstance(self.args[1], ast_base_types.ParenExpr)
+            and isinstance(self.args[1].args, ast_base_types.Name)):
+            return queryset.QuerySet({self.args[1].args.name: value}
+                                     for value in self.args[1].args(global_qs, parent))
         return self.args[1](global_qs, parent)
 
 class op_path_multi(ast_base_types.Op):

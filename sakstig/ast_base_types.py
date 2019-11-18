@@ -42,7 +42,7 @@ class Op(Expr, metaclass=Registry):
         raise NotImplementedError
     def __repr__(self):
         return "%s(%s)" % (self.name, ", ".join(repr(arg) for arg in self.args))
-
+    
 class Function(Op):
     abstract = True
     def __call__(self, global_qs, local_qs):
@@ -55,6 +55,17 @@ class Function(Op):
     
     def __repr__(self):
         return "%s(%s)" % (self.name, ", ".join(repr(arg) for arg in self.args))
+
+class ParenExpr(Expr):
+    def __init__(self, context, args):
+        self.context = context
+        self.args = args
+    
+    def __call__(self, global_qs, local_qs):
+        return self.args(global_qs, local_qs)
+
+    def __repr__(self):
+        return "(%s)" % (repr(self.args),)
     
 class Name(Expr):
     def __init__(self, context, name):
