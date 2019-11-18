@@ -94,6 +94,11 @@ class op_add_add(MathOp):
             return res
         elif typeinfo.is_set(a) and typeinfo.is_set(a):
             return a.union(b)
+        elif typeinfo.is_time(a) and typeinfo.is_time(b):
+            # Isn't this a bit of a hack? But ObjectPath allows this...
+            time_as_delta = (datetime.datetime.combine(datetime.datetime(1970,1,1), b)
+                             - datetime.datetime.combine(datetime.datetime(1970,1,1), datetime.time(0, 0, 0, 0, b.tzinfo)))
+            return (datetime.datetime.combine(datetime.datetime(1970,1,1), a) + time_as_delta).time()
         return a + b
 
 class op_add_sub(MathOp):

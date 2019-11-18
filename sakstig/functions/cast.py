@@ -82,9 +82,12 @@ def comp_time(item):
 class _dateTime(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         if not args:
-            return queryset.QuerySet([datetime.datetime.now()])
+            return queryset.QuerySet([datetime.datetime.now(datetime.timezone.utc)])
         elif len(args) == 2:
-            return args[1].map(lambda t: datetime.datetime.combine(comp_date(args[0][0]), comp_time(t)))
+            if len(args[1]) == 1 and typeinfo.is_str(args[1][0]):
+                return args[0].map(lambda l: datetime.datetime.strptime(l, args[1][0]))
+            else:
+                return args[1].map(lambda t: datetime.datetime.combine(comp_date(args[0][0]), comp_time(t)))
         return args[0].map(lambda l: comp_datetime(l))
 
 class _date(ast_base_types.Function):
