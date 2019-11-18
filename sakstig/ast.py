@@ -13,7 +13,7 @@ no_compatibility = dict(
     index_filter_queryset=False,
     descendant_leaves=True,
     cmp_empty_same=True,
-    dot_into_lists=False
+    empty_queryset_is_none=False
 )
 
 class AST(object):

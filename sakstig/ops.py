@@ -8,8 +8,6 @@ import math
 class op_path_one(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
         parent = self.args[0](global_qs, local_qs)
-        #if self.context.args.get("dot_into_lists", True):
-        #    parent = parent.flatten()
         return self.args[1](global_qs, parent)
 
 class op_path_multi(ast_base_types.Op):
@@ -130,6 +128,21 @@ class op_comp_not_in(MathOp):
             return True
         
 class op_comp_is(MathOp):
+    def __call__(self, global_qs, local_qs):
+        def result():
+            a_qs = self.args[0](global_qs, local_qs)
+            b_qs = self.args[1](global_qs, local_qs)
+            if self.context.args.get("empty_queryset_is_none", True):
+                if not a_qs and len(b_qs) == 1 and (b_qs[0] is None):
+                    yield True
+                    return
+                if not b_qs and len(a_qs) == 1 and (a_qs[0] is None):
+                    yield True
+                    return
+            for a in a_qs:
+                for b in b_qs:
+                    yield self._op(a, b)
+        return queryset.QuerySet(result())
     def op(self, a, b):
         if a == b:
             return True
@@ -147,6 +160,21 @@ class op_comp_is(MathOp):
             return a == b
             
 class op_comp_is_not(MathOp):
+    def __call__(self, global_qs, local_qs):
+        def result():
+            a_qs = self.args[0](global_qs, local_qs)
+            b_qs = self.args[1](global_qs, local_qs)
+            if self.context.args.get("empty_queryset_is_none", True):
+                if not a_qs and len(b_qs) == 1 and (b_qs[0] is None):
+                    yield False
+                    return
+                if not b_qs and len(a_qs) == 1 and (a_qs[0] is None):
+                    yield False
+                    return
+            for a in a_qs:
+                for b in b_qs:
+                    yield self._op(a, b)
+        return queryset.QuerySet(result())
     def op(self, a, b):
         if a == b:
             return False

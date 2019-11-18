@@ -38,6 +38,8 @@ class split(ast_base_types.Function):
 class slice(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         spec = args[1][0]
+        if not isinstance(spec, (list, tuple)):
+            raise Exception("Second argument to slice must be a list")
         def slice(s):
             if hasattr(spec[0], '__iter__'):
                 return [s[item[0]:item[1]]
