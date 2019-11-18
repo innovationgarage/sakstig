@@ -11,7 +11,9 @@ no_compatibility = dict(
     nop_star=False,
     add_as_join=False,
     index_filter_queryset=False,
-    descendant_leaves=True
+    descendant_leaves=True,
+    cmp_empty_same=True,
+    dot_into_lists=False
 )
 
 class AST(object):

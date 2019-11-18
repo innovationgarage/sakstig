@@ -58,11 +58,11 @@ usages of existing functions beyond what ObjectPath does:
 [{'a': 1, 'b': 1}, {'a': 1, 'b': 2}, {'a': 2, 'b': 2}]
 ```
 
-* map(array, path) evaluates the path for each array element,
+* map(path, array) evaluates the path for each array element,
   producing a new array. Example:
 
 ```python
->>> sakstig.QuerySet([[1, 2, 3]]).execute("map($, @+1)")
+>>> sakstig.QuerySet([[1, 2, 3]]).execute("map(@+1, $)")
 [2, 3, 4]
 ```
 

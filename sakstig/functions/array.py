@@ -4,6 +4,7 @@ from .. import ast_base_types
 from .. import queryset
 from .. import typeinfo
 import functools
+import collections
 
 class sort(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):        
@@ -24,6 +25,10 @@ class reverse(ast_base_types.Function):
     def call(self, global_qs, local_qs, args):
         return queryset.QuerySet([list(reversed(args[0].flatten()))])
 
+class unique(ast_base_types.Function):
+    def call(self, global_qs, local_qs, args):
+        return queryset.QuerySet([list(collections.OrderedDict.fromkeys(args[0].flatten()))])
+    
 def compat_len(item):
     # For compatibility with ObjectPath-ng
     if item in (True, False, None, 0, 1):
@@ -68,11 +73,17 @@ class keys(ast_base_types.Function):
 
 class _map(ast_base_types.Op):
     __name__ = "map"
-    def __call__(self, global_qs, local_qs):        
+    def __call__(self, global_qs, local_qs):
+        fn = self.args[0]
+        if isinstance(fn, ast_base_types.Name):
+            fn = ast_base_types.Function(
+                self.context, fn.name,
+                ast_base_types.Name(self.context, "@"))
+        array = self.args[1](global_qs, local_qs).flatten(no_dict=True)
         return queryset.QuerySet([
             list(queryset.QuerySet(item
-                          for item in (self.args[1](global_qs, queryset.QuerySet([item]))
-                                       for item in self.args[0](global_qs, local_qs).flatten(no_dict=True))
+                          for item in (fn(global_qs, queryset.QuerySet([item]))
+                                       for item in array)
                           if item).flatten())])
     
     def __repr__(self):

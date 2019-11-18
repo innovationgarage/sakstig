@@ -7,7 +7,10 @@ import math
 
 class op_path_one(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
-        return self.args[1](global_qs, self.args[0](global_qs, local_qs))
+        parent = self.args[0](global_qs, local_qs)
+        #if self.context.args.get("dot_into_lists", True):
+        #    parent = parent.flatten()
+        return self.args[1](global_qs, parent)
 
 class op_path_multi(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
@@ -130,6 +133,10 @@ class op_comp_is(MathOp):
     def op(self, a, b):
         if a == b:
             return True
+        if not a and not b:
+            if not self.context.args.get("cmp_empty_same", False):
+                return type(a) is type(b)
+            return True
         try:
             b = type(a)(b)
         except:
@@ -142,6 +149,10 @@ class op_comp_is(MathOp):
 class op_comp_is_not(MathOp):
     def op(self, a, b):
         if a == b:
+            return False
+        if not a and not b:
+            if not self.context.args.get("cmp_empty_same", False):
+                return type(a) is not type(b)
             return False
         try:
             b = type(a)(b)
@@ -172,11 +183,17 @@ class op_comp_regexp(MathOp):
     def op(self, a, b):
         if typeinfo.is_str(a):
             a = re.compile(a)
-        res = a.match(b)
-        if not res: return False
-        if len(res.groups()) == 0:
-            return True
-        return res.groups()
+        if isinstance(b, str):
+            res = a.match(b)
+            if not res: return False
+            if len(res.groups()) == 0:
+                return True
+            return res.groups()
+        else:
+            for bitem in b:
+                if a.match(bitem):
+                    return True
+            return False
 
 class op_bool_and(MathOp):
     def op(self, a, b):
