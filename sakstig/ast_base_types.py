@@ -109,7 +109,12 @@ class Name(Expr):
         else:
             if self.context.args.get("autoflatten_lists", True) and not getattr(local_qs, 'is_path_multi', False):
                 local_qs = local_qs.flatten(no_dict=True)
-            return local_qs.map(lambda item: item[self.name])
+            def get(item):
+                try:
+                    return item[self.name]
+                except:
+                    return getattr(item, self.name)
+            return local_qs.map(get)
     def __repr__(self):
         return "%s" % (self.name,)
 
