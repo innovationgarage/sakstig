@@ -271,8 +271,10 @@ class op_union_union(ast_base_types.Op):
 class filter(ast_base_types.Op):
     def filter_qs(self, filter, global_qs, local_qs):
         if self.context.args.get("filter_lists", True) and len(local_qs) == 1 and typeinfo.is_list(local_qs[0]):
-            for item in self.filter_qs(filter, global_qs, queryset.QuerySet(local_qs[0])):
-                yield item
+            if isinstance(filter, ast_base_types.Const) and typeinfo.is_int(filter.value):
+                yield local_qs[0][filter.value]
+            else:
+                yield list(self.filter_qs(filter, global_qs, queryset.QuerySet(local_qs[0])))
             return
         def getitem(obj, key):
             if typeinfo.is_list(obj):
