@@ -8,11 +8,22 @@ import math
 class op_path_one(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
         parent = self.args[0](global_qs, local_qs)
-        if (    self.context.args.get("_slicing", True)
-            and isinstance(self.args[1], ast_base_types.ParenExpr)
-            and isinstance(self.args[1].args, ast_base_types.Name)):
-            return queryset.QuerySet({self.args[1].args.name: value}
-                                     for value in self.args[1].args(global_qs, parent))
+        if self.context.args.get("object_slicing", True):
+            if isinstance(self.args[1], ast_base_types.ParenExpr):
+                parent = parent.flatten()
+                if isinstance(self.args[1].args, ast_base_types.Name):
+                    return queryset.QuerySet({self.args[1].args.name: value}
+                                             for value in self.args[1].args(global_qs, parent))
+                elif isinstance(self.args[1].args, op_union_union):
+                    return queryset.QuerySet(
+                        item
+                        for item in ({matchname: match[0]
+                                      for matchname, match in ((name.name, name(global_qs, queryset.QuerySet([value])))
+                                                               for name in self.args[1].args.args)
+                                      if match}
+                                     for value in parent)
+                        if item
+                    )
         return self.args[1](global_qs, parent)
 
 class op_path_multi(ast_base_types.Op):
@@ -259,24 +270,47 @@ class op_union_union(ast_base_types.Op):
     
 class filter(ast_base_types.Op):
     def filter_qs(self, filter, global_qs, local_qs):
+        if self.context.args.get("filter_lists", True) and len(local_qs) == 1 and typeinfo.is_list(local_qs[0]):
+            for item in self.filter_qs(filter, global_qs, queryset.QuerySet(local_qs[0])):
+                yield item
+            return
+        def getitem(obj, key):
+            if typeinfo.is_list(obj):
+                for item in obj:
+                    try:
+                        yield item[key]
+                    except:
+                        pass
+            else:
+                try:
+                    yield obj[key]
+                except:
+                    pass
         for idx, item in enumerate(local_qs):
             filter_qs = queryset.QuerySet([item])
             filter_qs.is_filter_qs = True
-            for filter_res in filter(global_qs, filter_qs):
-                if (self.context.args.get("index_filter_queryset", True)
-                    and typeinfo.is_int(filter_res)
-                    and len(local_qs) > 0
-                    and not typeinfo.is_list(local_qs[0])):
-                    if idx == filter_res:
-                        yield item
-                elif typeinfo.is_int(filter_res) or typeinfo.is_str(filter_res):
-                    try:
-                        yield item[filter_res]
-                    except:
-                        pass
-                else:
-                    if filter_res:
-                        yield item
+            if isinstance(filter, ast_base_types.Name) and filter.name not in ("$", "@"):
+                for res in getitem(item, filter.name):
+                    yield res
+            else:
+                for filter_res in filter(global_qs, filter_qs):
+                    if (self.context.args.get("index_filter_queryset", True)
+                        and typeinfo.is_int(filter_res)
+                        and len(local_qs) > 0
+                        and not typeinfo.is_list(local_qs[0])):
+                        if idx == filter_res:
+                            yield item
+                    elif typeinfo.is_int(filter_res):
+                        try:
+                            yield item[filter_res]
+                        except:
+                            pass
+                    elif typeinfo.is_str(filter_res):
+                        for res in getitem(item, filter_res):
+                            yield res
+                    else:
+                        if filter_res:
+                            yield item
     def __call__(self, global_qs, local_qs):
         local_qs = self.args[0](global_qs, local_qs)
         for filter in self.args[1:]:

@@ -80,6 +80,8 @@ class Name(Expr):
             if not self.context.args.get('nop_star', True) and not getattr(local_qs, 'is_path_multi', False):
                 local_qs = local_qs.flatten(children_only=True)
             return local_qs
+        elif self.name == "null":
+            return queryset.QuerySet([None])
         elif local_qs is None or getattr(local_qs, "is_filter_qs", False):
             return queryset.QuerySet([self.name])
         else:

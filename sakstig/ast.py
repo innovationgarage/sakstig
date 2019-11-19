@@ -14,7 +14,8 @@ no_compatibility = dict(
     descendant_leaves=True,
     cmp_empty_same=True,
     empty_queryset_is_none=False,
-    object_slicing=False
+    object_slicing=False,
+    filter_lists=False
 )
 
 class AST(object):
