@@ -12,10 +12,12 @@ class op_path_one(ast_base_types.Op):
             if isinstance(self.args[1], ast_base_types.ParenExpr):
                 parent = parent.flatten()
                 if isinstance(self.args[1].args, ast_base_types.Name):
-                    return queryset.QuerySet({self.args[1].args.name: value}
+                    res = queryset.QuerySet({self.args[1].args.name: value}
                                              for value in self.args[1].args(global_qs, parent))
+                    res.is_path_multi = parent.is_path_multi
+                    return res
                 elif isinstance(self.args[1].args, op_union_union):
-                    return queryset.QuerySet(
+                    res = queryset.QuerySet(
                         item
                         for item in ({matchname: match[0]
                                       for matchname, match in ((name.name, name(global_qs, queryset.QuerySet([value])))
@@ -24,8 +26,12 @@ class op_path_one(ast_base_types.Op):
                                      for value in parent)
                         if item
                     )
-        return self.args[1](global_qs, parent)
-
+                    res.is_path_multi = parent.is_path_multi
+                    return res
+        res = self.args[1](global_qs, parent)
+        res.is_path_multi = parent.is_path_multi
+        return res
+    
 class op_path_multi(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
         assert isinstance(self.args[1], ast_base_types.Name)
