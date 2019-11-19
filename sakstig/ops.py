@@ -171,6 +171,8 @@ class op_comp_is(MathOp):
             if not self.context.args.get("cmp_empty_same", False):
                 return type(a) is type(b)
             return True
+        if typeinfo.is_float(b):
+            a, b = b, a
         try:
             b = type(a)(b)
         except:
@@ -203,6 +205,8 @@ class op_comp_is_not(MathOp):
             if not self.context.args.get("cmp_empty_same", False):
                 return type(a) is not type(b)
             return False
+        if typeinfo.is_float(b):
+            a, b = b, a
         try:
             b = type(a)(b)
         except:
@@ -294,6 +298,13 @@ class filter(ast_base_types.Op):
             if isinstance(filter, ast_base_types.Name) and filter.name not in ("$", "@"):
                 for res in getitem(item, filter.name):
                     yield res
+            elif (    self.context.args.get("filter_bad_syntax", True)
+                  and isinstance(filter, op_path_one)
+                  and isinstance(filter.args[0], ast_base_types.Name)
+                  and filter.args[0].name == "@"
+                  and isinstance(filter.args[1], ast_base_types.Name)):
+                for res in getitem(item, filter.args[1].name):
+                    yield res                
             else:
                 for filter_res in filter(global_qs, filter_qs):
                     if (self.context.args.get("index_filter_queryset", True)
@@ -316,5 +327,8 @@ class filter(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
         local_qs = self.args[0](global_qs, local_qs)
         for filter in self.args[1:]:
-            local_qs = queryset.QuerySet(self.filter_qs(filter, global_qs, local_qs))
+            res_qs = queryset.QuerySet(self.filter_qs(filter, global_qs, local_qs))
+            if not isinstance(filter, ast_base_types.Const) or not typeinfo.is_int(filter.value):
+                res_qs.is_path_multi = local_qs.is_path_multi
+            local_qs = res_qs
         return local_qs

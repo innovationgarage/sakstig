@@ -1,6 +1,10 @@
 from . import typeinfo
 
 class QuerySet(list):
+    def __init__(self, *arg, **kw):
+        list.__init__(self, *arg, **kw)
+        self.is_path_multi = False
+        
     def __repr__(self):
         return "%s\n" % ("\n".join(repr(item) for item in self))
 
@@ -70,7 +74,7 @@ class Tree(object):
         self.queryset = QuerySet(obj)
     def execute(self, query, **args):
         r=self.queryset.execute(query, **args)
-        if len(r) == 1:
+        if len(r) == 1 and not r.is_path_multi:
             return r[0]
         elif len(r) == 0:
             return None
