@@ -275,7 +275,7 @@ class ObjectPath(unittest.TestCase):
 	def test_builtin_arithmetic(self):
 		self.assertEqual(execute("sum([1,2,3,4])"), sum([1,2,3,4]))
                 # CHANGED: sum(x1,x2,...,xn) == x1 + x2 + ... + xn
-		self.assertEqual(execute("sum([2,3,4,'333',[]])"), 342)
+		self.assertEqual(execute("sum([2,3,4,'333',[]])"), 9)
 		self.assertEqual(execute("min([1,2,3,4])"), min([1,2,3,4]))
 		self.assertEqual(execute("min([2,3,4,'333',[]])"), 2)
 		self.assertEqual(execute("max([1,2,3,4])"), max([1,2,3,4]))
@@ -284,14 +284,14 @@ class ObjectPath(unittest.TestCase):
 		self.assertEqual(execute("avg([1,3,3,1])"), 2.0)
 		self.assertEqual(execute("avg([1.1,1.3,1.3,1.1])"), 1.2000000000000002)
                 # CHANGED: avg(x1,x2,...,xn) == (x1 + x2 + ... + xn)/n
-		self.assertEqual(execute("avg([2,3,4,'333',[]])"), 68.4)
+		self.assertEqual(execute("avg([2,3,4,'333',[]])"), 3)
 		self.assertEqual(execute("round(2/3)"), round(2.0/3))
 		self.assertEqual(execute("round(2/3,3)"), round(2.0/3,3))
 		# edge cases
 		self.assertEqual(execute("avg(1)"), 1)
 		# should ommit 'sss'
                 # CHANGED: avg(x1,x2,...,xn) == (x1 + x2 + ... + xn)/n
-		self.assertEqual(execute("avg([1,'sss',3,3,1])"), 1.6)
+		self.assertEqual(execute("avg([1,'sss',3,3,1])"), 2.0)
 
 	def test_builtin_string(self):
 		self.assertEqual(execute("replace('foobar','oob','baz')"), 'fbazar')
@@ -345,10 +345,10 @@ class ObjectPath(unittest.TestCase):
 		self.assertEqual(execute("array(time([12,12,12,12])-time([1,2,3,4]))"), [11,10,9,8])
 		self.assertEqual(execute("array(time([12,00])-time([1,10]))"), [10,50,0,0])
 		self.assertEqual(execute("array(time([1,00])-time([1,10]))"), [23,50,0,0])
-		self.assertEqual(execute("array(time([0,00])-time([0,0,0,1]))"), [23,59,59,9999])
+		self.assertEqual(execute("array(time([0,00])-time([0,0,0,1]))"), [23,59,59,999999])
 		self.assertEqual(execute("array(time([0,0])+time([1,1,1,1]))"), [1,1,1,1])
 		self.assertEqual(execute("array(time([0,0])+time([1,2,3,4]))"), [1,2,3,4])
-		self.assertEqual(execute("array(time([23,59,59,9999])+time([0,0,0,1]))"), [0,0,0,0])
+		self.assertEqual(execute("array(time([23,59,59,999999])+time([0,0,0,1]))"), [0,0,0,0])
 		# age tests
 		self.assertEqual(execute("age(now())"), [0,"seconds"])
 		self.assertEqual(execute("age(dateTime([2000,1,1,1,1]),dateTime([2001,1,1,1,1]))"), [1,"year"])
@@ -425,18 +425,15 @@ class ObjectPath_Paths(unittest.TestCase):
 		self.assertEqual(list(execute2("$..author")), ['Nigel Rees', 'Evelyn Waugh', 'Herman Melville', 'J. R. R. Tolkien'])
 
 	def test_selectors(self):
-		self.assertEqual(len(execute("$..*[@._id>2]")), 2)
-                # CHANGED: Dictionaries inside lists aren't implicitly expanded, single item queryset always returned as item
-		self.assertEqual(execute("$..*[3 is @.l.*._id]"), object1['test'])
-                # CHANGED: Dictionaries inside lists aren't implicitly expanded, single item queryset always returned as item
-		self.assertEqual(execute2("$.store..*[4 is @.k.*._id]"), object2['store'])
-                # CHANGED: A QuerySet of multiple results is not a list, [idx] operates on list items in querysets, not on querysets
-		self.assertEqual(execute("$..*[@._id>1 and @._id<3]"), {'_id': 2})
+                self.assertEqual(len(execute("$..*[@._id>2]")), 2)
+                self.assertEqual(execute("$..*[3 in @.l._id]")[0], object1['test'])
+                self.assertEqual(execute2("$.store..*[4 in @.k._id]")[0], object2['store'])
+                self.assertEqual(execute("$..*[@._id>1 and @._id<3][0]"), {'_id': 2})
                 # CHANGED: Totally undocumented syntax! In SakStig,
                 # $.store.book[@.price] a $.store.book such that it's
                 # price attribute is non-false, which isn't going to
                 # match anything.
-		self.assertEqual(sorted(execute2("$.store.book.*.price")), sorted([8.95,12.99,8.99,22.99]))
+                self.assertEqual(sorted(execute2("$.store.book.*.price")), sorted([8.95,12.99,8.99,22.99]))
 
 #testcase2=unittest.FunctionTestCase(test_efficiency(2))
 testcase1=unittest.TestLoader().loadTestsFromTestCase(ObjectPath)
