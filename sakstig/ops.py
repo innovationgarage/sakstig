@@ -8,33 +8,13 @@ import math
 class op_path_one(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
         parent = self.args[0](global_qs, local_qs)
-        if self.context.args.get("object_slicing", True):
-            if isinstance(self.args[1], ast_base_types.ParenExpr):
-                parent = parent.flatten()
-                if isinstance(self.args[1].args, ast_base_types.Name):
-                    res = queryset.QuerySet({self.args[1].args.name: value}
-                                             for value in self.args[1].args(global_qs, parent))
-                    res.is_path_multi = parent.is_path_multi
-                    return res
-                elif isinstance(self.args[1].args, op_union_union):
-                    res = queryset.QuerySet(
-                        item
-                        for item in ({matchname: match[0]
-                                      for matchname, match in ((name.name, name(global_qs, queryset.QuerySet([value])))
-                                                               for name in self.args[1].args.args)
-                                      if match}
-                                     for value in parent)
-                        if item
-                    )
-                    res.is_path_multi = parent.is_path_multi
-                    return res
         res = self.args[1](global_qs, parent)
         res.is_path_multi = parent.is_path_multi
         return res
     
 class op_path_multi(ast_base_types.Op):
     def __call__(self, global_qs, local_qs):
-        assert isinstance(self.args[1], ast_base_types.Name)
+        assert isinstance(self.args[1], ast_base_types.Name) or isinstance(self.args[1], ast_base_types.ParenExpr), "..%s is invalid" % type(self.args[1])
         local_qs = self.args[0](global_qs, local_qs).descendants(
             include_leaves=self.context.args.get("descendant_leaves", False))
         local_qs.is_path_multi = True

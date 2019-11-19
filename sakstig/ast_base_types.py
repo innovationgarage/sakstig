@@ -62,8 +62,27 @@ class ParenExpr(Expr):
         self.args = args
     
     def __call__(self, global_qs, local_qs):
+        if self.context.args.get("object_slicing", True):
+            parent = local_qs and local_qs.flatten()
+            if isinstance(self.args, Name):
+                res = queryset.QuerySet({self.args.name: value}
+                                         for value in self.args(global_qs, parent))
+                res.is_path_multi = local_qs and local_qs.is_path_multi
+                return res
+            elif type(self.args).__name__ == "op_union_union":
+                res = queryset.QuerySet(
+                    item
+                    for item in ({matchname: match[0]
+                                  for matchname, match in ((name.name, name(global_qs, queryset.QuerySet([value])))
+                                                           for name in self.args.args)
+                                  if match}
+                                 for value in parent)
+                    if item
+                )
+                res.is_path_multi = local_qs and local_qs.is_path_multi
+                return res
         return self.args(global_qs, local_qs)
-
+            
     def __repr__(self):
         return "(%s)" % (repr(self.args),)
     
