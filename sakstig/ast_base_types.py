@@ -63,7 +63,10 @@ class ParenExpr(Expr):
     
     def __call__(self, global_qs, local_qs):
         if self.context.args.get("object_slicing", True):
-            parent = local_qs and local_qs.flatten()
+            if not local_qs or local_qs.is_path_multi:
+                parent = local_qs
+            else:
+                parent = local_qs.flatten()
             if isinstance(self.args, Name):
                 res = queryset.QuerySet({self.args.name: value}
                                          for value in self.args(global_qs, parent))
