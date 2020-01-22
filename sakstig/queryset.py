@@ -4,9 +4,15 @@ class QuerySet(list):
     def __init__(self, *arg, **kw):
         list.__init__(self, *arg, **kw)
         self.is_path_multi = False
-        
+
     def __repr__(self):
         return "%s\n" % ("\n".join(repr(item) for item in self))
+
+    def __str__(self):
+        if len(self) == 1:
+            return str(self[0])
+        else:
+            return super().__str__(self)
 
     def execute(self, query, global_qs = None, **args):
         from . import ast
