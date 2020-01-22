@@ -3,7 +3,7 @@
 import setuptools
 
 setuptools.setup(name='sakstig',
-      version='0.1.6',
+      version='0.1.7',
       description='SakStig is an objectpath implementation that uses '
       'proper querysets and supports querying any python object that '
       'supports the dict or list interfaces.',
