@@ -142,18 +142,19 @@ class AST(object):
         return ast_base_types.Op(self, "filter", path, *filters)
 
 def compile(query, **args):
-    tree = grammar.grammar.parse(query)
+    gramr = grammar.SakstigGrammar()
+    tree = gramr.parse(query)
     if not tree.is_valid:
         raise SyntaxError("Malformed query: %s<ERROR>%s\n%s" % (
             query[:tree.pos],
             query[tree.pos:],
-            grammar.format_tree(tree.tree)))
+            gramr.format_tree(tree.tree)))
     return AST(tree.tree, **args)
     
 def main():
     from . import grammar
     import sys
-    res = grammar.grammar.parse(sys.argv[1])
+    res = grammar.SakstigGrammar().parse(sys.argv[1])
     if not res.is_valid:
         print("INVALID EXPRESSION")
     else:

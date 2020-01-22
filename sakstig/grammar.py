@@ -81,10 +81,7 @@ class SakstigGrammar(Grammar):
     NO_COMMA_START = Sequence(bool)    
     START = Sequence(union)
 
-    
-grammar = SakstigGrammar()
 
-        
 def format_tree(node, indent=''):
     if len(node.children) == 1:
         return format_tree(node.children[0], indent)
@@ -96,7 +93,7 @@ def format_tree(node, indent=''):
 
 def main():
     import sys
-    res = grammar.parse(sys.argv[1])
+    res = SakstigGrammar().parse(sys.argv[1])
     if not res.is_valid:
         print("INVALID EXPRESSION")
     else:
