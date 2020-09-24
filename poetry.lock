@@ -1,0 +1,41 @@
+[[package]]
+category = "dev"
+description = "nose extends unittest to make testing easier"
+name = "nose"
+optional = false
+python-versions = "*"
+version = "1.3.7"
+
+[[package]]
+category = "dev"
+description = "The agile query language for semi-structured data. #JSON"
+name = "objectpath"
+optional = false
+python-versions = "*"
+version = "0.6.1"
+
+[[package]]
+category = "main"
+description = "Python Left-Right Parser"
+name = "pyleri"
+optional = false
+python-versions = "*"
+version = "1.3.2"
+
+[metadata]
+content-hash = "6e219ab3a31ec65159fe14c67a1a5849109ecc5ff1e667205d9077c767888123"
+python-versions = "^3.7"
+
+[metadata.files]
+nose = [
+    {file = "nose-1.3.7-py2-none-any.whl", hash = "sha256:dadcddc0aefbf99eea214e0f1232b94f2fa9bd98fa8353711dacb112bfcbbb2a"},
+    {file = "nose-1.3.7-py3-none-any.whl", hash = "sha256:9ff7c6cc443f8c51994b34a667bbcf45afd6d945be7477b52e97516fd17c53ac"},
+    {file = "nose-1.3.7.tar.gz", hash = "sha256:f1bffef9cbc82628f6e7d7b40d7e255aefaa1adb6a1b1d26c69a8b79e6208a98"},
+]
+objectpath = [
+    {file = "objectpath-0.6.1-py2.py3-none-any.whl", hash = "sha256:7ac2c507e7e5bfbf245701044453edc8e4073ded01d53349237d918124d7ca87"},
+    {file = "objectpath-0.6.1.tar.gz", hash = "sha256:461263136c79292e42431fbb85cdcaac4c6a256f6b1aa5b3ae9316e4965ad819"},
+]
+pyleri = [
+    {file = "pyleri-1.3.2.tar.gz", hash = "sha256:f893dd2989feaa27ead244c0887e45aa831df408eeb7d19ecfe30358fbfabe69"},
+]
