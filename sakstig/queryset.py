@@ -8,6 +8,9 @@ class QuerySet(list):
     def __repr__(self):
         return "%s\n" % ("\n".join(repr(item) for item in self))
 
+    def __str__(self):
+        return "\n".join(str(item) for item in self)
+
     def execute(self, query, global_qs = None, **args):
         from . import ast
         from . import ast_base_types
